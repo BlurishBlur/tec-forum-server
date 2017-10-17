@@ -9,40 +9,32 @@ users.push({username: "Niels", password: "123"});
 users.push({username: "Antonio", password: "123"});
 users.push({username: "Niclas", password: "123"});
 
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
   host: "mysql68.unoeuro.com",
   user: "lascari_net",
   password: "Feline123",
   database: 'lascari_net_db'
 });
 
-/*connection.connect(function(error) {
-  if(error){
-    console.log('Error connecting to Db');
-    return;
-  }
-  console.log('Connection established');
-});*/
-
-
 query = function() {
-    connection.getConnection(function(error, tempConnection) {
+    pool.getConnection(function(error, connection) {
         if(error) {
-            //tempConnection.release();
+            connection.release();
             console.log('Error connecting to database');
         }
         else {
-            /*console.log('Connected');
+            console.log('Connected');
 
-            tempConnection.query('SELECT * FROM Users', function (err, result) {
-                tempConnection.release();
-                if (err) {
-                    throw err;
+            connection.query('SELECT * FROM Users', function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw err;
+                    console.log('Error in the query');
                 }
                 else {
                     console.log(result);
                 }
-            });*/
+            });
         }
     });
 }
