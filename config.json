@@ -1,0 +1,12 @@
+{
+    "server": {
+        "host": "localhost", 
+        "port": 8761
+    }, 
+    "database": {
+        "host": "mysql68.unoeuro.com", 
+        "user": "lascari_net", 
+        "password": "Feline123", 
+        "database": "lascari_net_db"
+    }
+}

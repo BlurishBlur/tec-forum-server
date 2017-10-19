@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 var http = require('http');
-const PORT = 8761;
 var mysql = require('mysql');
+var config = require('./config.json');
 
 var pool = mysql.createPool({
-    host: "mysql68.unoeuro.com",
-    user: "lascari_net",
-    password: "Feline123",
-    database: 'lascari_net_db'
+    host: config.database.host,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.database
 });
 
 query = function() {
@@ -53,7 +53,7 @@ saveUser = function(data) {
                     console.log('Error in the query');
                 }
                 else {
-                    console.log('Successfully created user ' + data);
+                    console.log('Successfully created user ' + data8);
                 }
             });
         }
@@ -160,6 +160,6 @@ var server = http.createServer(function (request, response){
     handleRequest(request, response);
 });
 
-server.listen(PORT, function(){
-    console.log("Listening to http://localhost:%s", PORT);
+server.listen(config.server.port, config.server.host, function(){
+    console.log("Listening to http://%s:%s", config.server.host, config.server.port);
 });
