@@ -57,7 +57,7 @@ deleteAllUsers = function() {
     });
 }
 
-createTestUser = function(data) {
+createTestUser = function() {
     pool.getConnection(function(error, connection) {
         if(error) {
             connection.release();
@@ -66,15 +66,14 @@ createTestUser = function(data) {
         else {
             console.log('Connected to database');
             var query = "INSERT INTO users(username, password) VALUES(?, ?);";
-            var userObj = JSON.parse(data);
-            connection.query(query, ['Test', '123'], function (error, result) {
+            connection.query(query, ['Niels', '123'], function (error, result) {
                 connection.release();
                 if (error) {
                     throw error;
                     console.log('Error in the query');
                 }
                 else {
-                    console.log('Successfully created user ' + data);
+                    console.log('Successfully created user');
                 }
             });
         }
