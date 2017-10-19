@@ -20,10 +20,10 @@ getAllUsers = function() {
         else {
             console.log('Connected to database');
 
-            connection.query('SELECT * FROM Users', function (error, result) {
+            connection.query('SELECT * FROM users;', function (error, result) {
                 connection.release();
                 if (error) {
-                    //throw err;
+                    //throw error;
                     console.log('Error in the query');
                 }
                 else {
@@ -43,10 +43,10 @@ deleteAllUsers = function() {
         else {
             console.log('Connected to database');
 
-            connection.query('DELETE from Users', function (error, result) {
+            connection.query('DELETE from users;', function (error, result) {
                 connection.release();
                 if (error) {
-                    //throw err;
+                    //throw error;
                     console.log('Error in the query');
                 }
                 else {
@@ -65,7 +65,7 @@ createTestUser = function(data) {
         }
         else {
             console.log('Connected to database');
-            var query = "INSERT INTO Users(username, password) VALUES(?, ?)";
+            var query = "INSERT INTO users(username, password) VALUES(?, ?);";
             var userObj = JSON.parse(data);
             connection.query(query, ['Test', '123'], function (error, result) {
                 connection.release();
@@ -75,7 +75,6 @@ createTestUser = function(data) {
                 }
                 else {
                     console.log('Successfully created user ' + data);
-                    getAllUsers();
                 }
             });
         }
@@ -90,7 +89,7 @@ saveUser = function(data) {
         }
         else {
             console.log('Connected to database');
-            var query = "INSERT INTO Users(username, password) VALUES(?, ?)";
+            var query = "INSERT INTO users(username, password) VALUES(?, ?);";
             var userObj = JSON.parse(data);
             connection.query(query, [userObj.username, userObj.password], function (error, result) {
                 connection.release();
@@ -108,26 +107,34 @@ saveUser = function(data) {
 }
 
 logIn = function(data, callback) {
-    var loggedIn = false;
+    var logInDTO = {loggedIn: false, id: -1, message: ''};
     pool.getConnection(function(error, connection) {
         if(error) {
             connection.release();
             console.log('Error connecting to database');
+            logInDTO.message = 'Database connection error.'
         }
         else {
             console.log('Connected to database');
-            var query = "SELECT username FROM Users WHERE username = ? AND password = ?"
+            var query = "SELECT id FROM users WHERE username = ? AND password = ?;";
             var userObj = JSON.parse(data);
             connection.query(query, [userObj.username, userObj.password], function (error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
                     console.log('Error in the query');
+                    logInDTO.message = 'Database error.';
                 }
                 else {
-                    loggedIn = (result.length > 0);
+                    logInDTO.loggedIn = (result.length > 0);
+                    if(logInDTO.loggedIn === true) {
+                        logInDTO.id = result[0].id;
+                    }
+                    else {
+                        logInDTO.message = 'Wrong username or password.';
+                    }
                 }
-                callback(loggedIn);
+                callback(logInDTO);
             });
         }
     });
@@ -157,9 +164,9 @@ putUser = function(request, response) { //create
 postUser = function(request, response) { //login
     request.on('data', function(data) {
         console.log('Received login request for: ' + data);
-        logIn(data, function(loggedIn) {
-            console.log('Logged in: ' + loggedIn);
-            response.end(JSON.stringify(loggedIn));
+        logIn(data, function(logInDTO) {
+            console.log(logInDTO);
+            response.end(JSON.stringify(logInDTO));
         });
     })
 }
