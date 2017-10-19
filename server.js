@@ -11,7 +11,7 @@ var pool = mysql.createPool({
     database: config.database.database
 });
 
-query = function() {
+getAllUsers = function() {
     pool.getConnection(function(error, connection) {
         if(error) {
             connection.release();
@@ -34,7 +34,53 @@ query = function() {
     });
 }
 
-query();
+deleteAllUsers = function() {
+    pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+
+            connection.query('DELETE from Users', function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw err;
+                    console.log('Error in the query');
+                }
+                else {
+                    console.log(result);
+                }
+            });
+        }
+    });
+}
+
+createTestUser = function(data) {
+    pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+            var query = "INSERT INTO Users(username, password) VALUES(?, ?)";
+            var userObj = JSON.parse(data);
+            connection.query(query, ['Test', '123'], function (error, result) {
+                connection.release();
+                if (error) {
+                    throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    console.log('Successfully created user ' + data);
+                    getAllUsers();
+                }
+            });
+        }
+    });
+}
 
 saveUser = function(data) {
     pool.getConnection(function(error, connection) {
@@ -53,7 +99,8 @@ saveUser = function(data) {
                     console.log('Error in the query');
                 }
                 else {
-                    console.log('Successfully created user ' + data8);
+                    console.log('Successfully created user ' + data);
+                    getAllUsers();
                 }
             });
         }
