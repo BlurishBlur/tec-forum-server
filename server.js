@@ -65,8 +65,8 @@ createTestUser = function() {
         }
         else {
             console.log('Connected to database');
-            var query = "INSERT INTO users(username, password) VALUES(?, ?);";
-            connection.query(query, ['Niels', '123'], function (error, result) {
+            var query = "INSERT INTO users(username, password) VALUES('Antonio', '123'), ('Niels', '123'), ('Niclas', '123');";
+            connection.query(query, function (error, result) {
                 connection.release();
                 if (error) {
                     throw error;
