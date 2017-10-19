@@ -4,12 +4,9 @@ var http = require('http');
 var mysql = require('mysql');
 var config = require('./config.json');
 
-var pool = mysql.createPool({
-    host: config.database.host,
-    user: config.database.user,
-    password: config.database.password,
-    database: config.database.database
-});
+var pool = mysql.createPool(
+    config.database
+);
 
 getAllUsers = function() {
     pool.getConnection(function(error, connection) {
@@ -83,6 +80,7 @@ createTestUser = function() {
 saveUser = function(data) {
     pool.getConnection(function(error, connection) {
         if(error) {
+            throw error;
             connection.release();
             console.log('Error connecting to database');
         }
@@ -109,6 +107,7 @@ logIn = function(data, callback) {
     var logInDTO = {loggedIn: false, id: -1, message: ''};
     pool.getConnection(function(error, connection) {
         if(error) {
+            throw error;
             connection.release();
             console.log('Error connecting to database');
             logInDTO.message = 'Database connection error.'

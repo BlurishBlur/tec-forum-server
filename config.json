@@ -7,6 +7,10 @@
         "host": "mysql68.unoeuro.com", 
         "user": "lascari_net", 
         "password": "Feline123", 
-        "database": "lascari_net_db"
+        "database": "lascari_net_db", 
+        "connectionLimit": 1000,
+        "connectTimeout": 3600000,
+        "acquireTimeout": 3600000, 
+        "timeout": 3600000
     }
 }
