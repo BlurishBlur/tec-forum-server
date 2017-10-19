@@ -77,12 +77,15 @@ createTestUser = function() {
     });
 }
 
-saveUser = function(data) {
+saveUser = function(data, callback) {
+    var saveUserDTO = {message: ''};
     pool.getConnection(function(error, connection) {
         if(error) {
             throw error;
             connection.release();
             console.log('Error connecting to database');
+            saveUserDTO.message = 'Database connection error.';
+            callback(saveUserDTO);
         }
         else {
             console.log('Connected to database');
@@ -93,11 +96,14 @@ saveUser = function(data) {
                 if (error) {
                     throw error;
                     console.log('Error in the query');
+                    saveUserDTO.message = 'Database error.';
                 }
                 else {
                     console.log('Successfully created user ' + data);
+                    saveUserDTO.message = 'User created.';
                     getAllUsers();
                 }
+                callback(saveUserDTO);
             });
         }
     });
@@ -110,7 +116,8 @@ logIn = function(data, callback) {
             throw error;
             connection.release();
             console.log('Error connecting to database');
-            logInDTO.message = 'Database connection error.'
+            logInDTO.message = 'Database connection error.';
+            callback(logInDTO);
         }
         else {
             console.log('Connected to database');
@@ -136,9 +143,6 @@ logIn = function(data, callback) {
             });
         }
     });
-    /*var contains = users.some(function(user) {
-        return user.username === userObj.username && user.password === userObj.password;
-    });*/
 }
 
 sendHeader = function (response) {
@@ -153,9 +157,11 @@ getUsers = function(request, response) {
 
 putUser = function(request, response) { //create
     request.on('data', function(data) {
-        console.log('Received user data: ' + data);
-        saveUser(data);
-        response.end('User created.');
+        console.log('Received user creation request for: ' + data);
+        saveUser(data, function(saveUserDTO) {
+            console.log(saveUserDTO);
+            response.end(JSON.stringify(saveUserDTO));
+        });
     });
 }
 
