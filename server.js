@@ -74,11 +74,11 @@ logIn = function(data, callback) {
             connection.query(query, [userObj.username, userObj.password], function (error, result) {
                 connection.release();
                 if (error) {
-                    //throw err;
+                    //throw error;
                     console.log('Error in the query');
                 }
                 else {
-                    loggedIn = (result != null);
+                    loggedIn = (result.length > 0);
                 }
                 callback(loggedIn);
             });
