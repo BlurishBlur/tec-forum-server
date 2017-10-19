@@ -5,10 +5,10 @@ const PORT = 8761;
 var mysql = require('mysql');
 
 var pool = mysql.createPool({
-  host: "mysql68.unoeuro.com",
-  user: "lascari_net",
-  password: "Feline123",
-  database: 'lascari_net_db'
+    host: "mysql68.unoeuro.com",
+    user: "lascari_net",
+    password: "Feline123",
+    database: 'lascari_net_db'
 });
 
 query = function() {
@@ -37,9 +37,27 @@ query = function() {
 query();
 
 saveUser = function(data) {
-    var userObj = JSON.parse(data);
-    users.push(userObj);
-    console.log(users);
+    pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected');
+            var query = "INSERT INTO Users(username, password) VALUES(?, ?)";
+            var userObj = JSON.parse(data);
+            connection.query(query, [userObj.username, userObj.password], function (error, result) {
+                connection.release();
+                if (error) {
+                    throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    console.log('Successfully created user');
+                }
+            });
+        }
+    });
 }
 
 logIn = function(data, callback) {
