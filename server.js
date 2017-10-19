@@ -4,11 +4,6 @@ var http = require('http');
 const PORT = 8761;
 var mysql = require('mysql');
 
-var users = [];
-users.push({username: "Niels", password: "123"});
-users.push({username: "Antonio", password: "123"});
-users.push({username: "Niclas", password: "123"});
-
 var pool = mysql.createPool({
   host: "mysql68.unoeuro.com",
   user: "lascari_net",
@@ -47,14 +42,33 @@ saveUser = function(data) {
     console.log(users);
 }
 
-logIn = function(data) {
-    var userObj = JSON.parse(data);
-
-    var contains = users.some(function(user) {
-        return user.username === userObj.username && user.password === userObj.password;
+logIn = function(data, callback) {
+    var loggedIn = false;
+    pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected');
+            var query = "SELECT username FROM Users WHERE username = ? AND password = ?"
+            var userObj = JSON.parse(data);
+            connection.query(query, [userObj.username, userObj.password], function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw err;
+                    console.log('Error in the query');
+                }
+                else {
+                    loggedIn = (result != null);
+                }
+                callback(loggedIn);
+            });
+        }
     });
-    console.log('Logged in: ' + contains);
-    return contains;
+    /*var contains = users.some(function(user) {
+        return user.username === userObj.username && user.password === userObj.password;
+    });*/
 }
 
 sendHeader = function (response) {
@@ -78,8 +92,10 @@ putUser = function(request, response) { //create
 postUser = function(request, response) { //login
     request.on('data', function(data) {
         console.log('Received login request from: ' + data);
-        var loggedIn = logIn(data);
-        response.end(JSON.stringify(loggedIn));
+        logIn(data, function(loggedIn) {
+            console.log('Logged in: ' + loggedIn);
+            response.end(JSON.stringify(loggedIn));
+        });
     })
 }
 
