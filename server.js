@@ -18,7 +18,7 @@ query = function() {
             console.log('Error connecting to database');
         }
         else {
-            console.log('Connected');
+            console.log('Connected to database');
 
             connection.query('SELECT * FROM Users', function (error, result) {
                 connection.release();
@@ -43,7 +43,7 @@ saveUser = function(data) {
             console.log('Error connecting to database');
         }
         else {
-            console.log('Connected');
+            console.log('Connected to database');
             var query = "INSERT INTO Users(username, password) VALUES(?, ?)";
             var userObj = JSON.parse(data);
             connection.query(query, [userObj.username, userObj.password], function (error, result) {
@@ -53,7 +53,7 @@ saveUser = function(data) {
                     console.log('Error in the query');
                 }
                 else {
-                    console.log('Successfully created user');
+                    console.log('Successfully created user ' + data);
                 }
             });
         }
@@ -68,7 +68,7 @@ logIn = function(data, callback) {
             console.log('Error connecting to database');
         }
         else {
-            console.log('Connected');
+            console.log('Connected to database');
             var query = "SELECT username FROM Users WHERE username = ? AND password = ?"
             var userObj = JSON.parse(data);
             connection.query(query, [userObj.username, userObj.password], function (error, result) {
@@ -109,7 +109,7 @@ putUser = function(request, response) { //create
 
 postUser = function(request, response) { //login
     request.on('data', function(data) {
-        console.log('Received login request from: ' + data);
+        console.log('Received login request for: ' + data);
         logIn(data, function(loggedIn) {
             console.log('Logged in: ' + loggedIn);
             response.end(JSON.stringify(loggedIn));
