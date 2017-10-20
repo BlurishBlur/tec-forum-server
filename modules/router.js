@@ -60,11 +60,10 @@ module.exports = {
         sendHeader(response); // burde kun være nødvendigt at sende headeren her
         var routedRequest = request['method'] + request.url;
         if(routes[routedRequest]) {
-            console.log('metode findes og kaldes nu')
             routes[routedRequest](request, response);
         }
         else {
-            console.log('metode findes ikke: ' + routedRequest);
+            console.log('Could not find method ' + routedRequest);
             response.end("404 - Not found"); // egentligt burde statussen fra senderHeader sættes til 404 i stedet for 200 her
         }
     }
