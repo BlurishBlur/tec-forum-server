@@ -7,6 +7,37 @@ var pool = mysql.createPool(
 
 module.exports = {
 
+    deleteUser: function(data, callback) {
+        var deleteUserDTO = {message: ''};
+        pool.getConnection(function(error, connection) {
+            if(error) {
+                throw error;
+                connection.release();
+                console.log('Error connecting to database');
+                deleteUserDTO.message = 'Database connection error.';
+                callback(deleteUserDTO);
+            }
+            else {
+                console.log('Connected to database');
+                var query = "DELETE FROM users WHERE username = ? AND id = ?;";
+                var userObj = JSON.parse(data);
+                connection.query(query, [userObj.username, userObj.id], function (error, result) {
+                    connection.release();
+                    if (error) {
+                        throw error;
+                        console.log('Error in the query');
+                        deleteUserDTO.message = 'Database error.';
+                    }
+                    else {
+                        console.log('Successfully deleted user ' + data);
+                        deleteUserDTO.message = 'User deleted.';
+                    }
+                    callback(deleteUserDTO);
+                });
+            }
+        });
+    }, 
+
     saveUser: function(data, callback) {
         var saveUserDTO = {message: ''};
         pool.getConnection(function(error, connection) {
