@@ -5,6 +5,8 @@ var pool = mysql.createPool(
     config.database
 );
 
+console.log('1: get users, 2: create users, 3: delete users');
+
 function execute(number) {
     switch(number) {
         case '1':
