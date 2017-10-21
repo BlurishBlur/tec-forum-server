@@ -47,7 +47,10 @@ module.exports = {
         else {
             console.log('Connected to database');
 
-            connection.query('SELECT * FROM categories;', function (error, result) {
+            var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory FROM lascari_net_db.categories ' +
+            'LEFT JOIN (SELECT threads.id, threads.categoryId, COUNT(*) AS threadsPerCategory FROM lascari_net_db.threads GROUP BY threads.categoryId) threads ' +
+            'ON categories.id=threads.categoryId;';
+            connection.query(sqlQuery, function (error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
@@ -56,8 +59,10 @@ module.exports = {
                 else {
                     console.log(result);
                     for (var i = 0; i < result.length; i++) {
+                        var count;
+                        result[i].threadsPerCategory == undefined ? count = 0 : count = result[i].threadsPerCategory;
                         categoriesDTO.push( {id: result[i].id, title: result[i].title, 
-                            description: result[i].description} );
+                            description: result[i].description, postsCount: count} );
                     }
                 }
                 callback(categoriesDTO);
