@@ -7,6 +7,34 @@ var pool = mysql.createPool(
 
 module.exports = {
 
+    getCategories: function(callback) {
+        var categoriesDTO = [];
+        pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+
+            connection.query('SELECT * FROM categories;', function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    console.log(result);
+                    for (var i = 0; i < result.length; i++) {
+                        categoriesDTO.push( {id: result[i].id, title: result[i].title, description: result[i].description} );
+                    }
+                }
+                callback(categoriesDTO);
+            });
+        }
+        });
+    }, 
+
     deleteUser: function(data, callback) {
         var deleteUserDTO = {message: ''};
         pool.getConnection(function(error, connection) {

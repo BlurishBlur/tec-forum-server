@@ -13,6 +13,12 @@ getUsers = function(request, response) {
     response.end(database.getAllUsers());
 }
 
+getCategories = function(request, response) {
+    database.getCategories(function(categoriesDTO) {
+        response.end(JSON.stringify(categoriesDTO));
+    });
+}
+
 putUser = function(request, response) { //create
     request.on('data', function(data) {
         console.log('Received user creation request for: ' + data);
@@ -48,6 +54,7 @@ sendOptions = function (request, response) {
 
 routes = {
     'GET/users':     getUsers,
+    'GET/categories':     getCategories,
     'PUT/users':     putUser,
     'POST/users':    postUser,
     'DELETE':        handler_delete,
