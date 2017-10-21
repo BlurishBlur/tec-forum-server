@@ -7,6 +7,36 @@ var pool = mysql.createPool(
 
 module.exports = {
 
+    getThreadsInCategory: function(data, callback) {
+        var threadsDTO = [];
+        pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+            var query = 'SELECT * FROM threads WHERE categoryId = ?;';
+            connection.query(query, JSON.parse(data), function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    console.log(result);
+                    for (var i = 0; i < result.length; i++) {
+                        threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
+                            authorId: result[i].authorId, title: result[i].title, 
+                            content: result[i].content, creationDate: result[i].creationDate} );
+                    }
+                }
+                callback(threadsDTO);
+            });
+        }
+        });
+    }, 
+
     getCategories: function(callback) {
         var categoriesDTO = [];
         pool.getConnection(function(error, connection) {
@@ -26,7 +56,8 @@ module.exports = {
                 else {
                     console.log(result);
                     for (var i = 0; i < result.length; i++) {
-                        categoriesDTO.push( {id: result[i].id, title: result[i].title, description: result[i].description} );
+                        categoriesDTO.push( {id: result[i].id, title: result[i].title, 
+                            description: result[i].description} );
                     }
                 }
                 callback(categoriesDTO);
