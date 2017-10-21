@@ -7,7 +7,37 @@ var pool = mysql.createPool(
 
 module.exports = {
 
-    getThreadsInCategory: function(data, callback) {
+    getUser: function(queryObj, callback) {
+        var userDTO = {};
+        pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+            console.log(queryObj);
+            console.log(queryObj.id);
+            var sqlQuery = 'SELECT * FROM users WHERE id = ?;';
+            connection.query(sqlQuery, queryObj.id, function (error, result) {
+                connection.release();
+                if (error) {
+                    throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    //console.log(result);
+                    userDTO.id = result[0].id;
+                    userDTO.username = result[0].username;
+                    userDTO.creationDate = result[0].creationDate;
+                }
+                callback(userDTO);
+            });
+        }
+        });
+    }, 
+
+    getThreadsInCategory: function(queryObj, callback) {
         var threadsDTO = [];
         pool.getConnection(function(error, connection) {
         if(error) {
@@ -17,14 +47,14 @@ module.exports = {
         else {
             console.log('Connected to database');
             var query = 'SELECT * FROM threads WHERE categoryId = ?;';
-            connection.query(query, JSON.parse(data), function (error, result) {
+            connection.query(query, queryObj.id, function (error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
                     console.log('Error in the query');
                 }
                 else {
-                    console.log(result);
+                    //console.log(result);
                     for (var i = 0; i < result.length; i++) {
                         threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
                             authorId: result[i].authorId, title: result[i].title, 
@@ -61,7 +91,7 @@ module.exports = {
                     console.log('Error in the query');
                 }
                 else {
-                    console.log(result);
+                    //console.log(result);
                     for (var i = 0; i < result.length; i++) {
                         var postsCount;
                         var commentsCount;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var database = require('./database.js');
-
+var url = require('url');
 
 
 sendHeader = function (response) {
@@ -9,8 +9,11 @@ sendHeader = function (response) {
                              'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
 }
 
-getUsers = function(request, response) {
-    response.end(database.getAllUsers());
+getUser = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getUser(urlParts.query, function(userDTO) {
+        response.end(JSON.stringify(userDTO));
+    });
 }
 
 getCategories = function(request, response) {
@@ -19,11 +22,10 @@ getCategories = function(request, response) {
     });
 }
 
-getThreadsInCategory = function(request, response) { //create
-    request.on('data', function(data) {
-        database.getThreadsInCategory(data, function(threadsDTO) {
-            response.end(JSON.stringify(threadsDTO));
-        });
+getThreadsInCategory = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getThreadsInCategory(urlParts.query, function(threadsDTO) {
+        response.end(JSON.stringify(threadsDTO));
     });
 }
 
@@ -61,9 +63,9 @@ sendOptions = function (request, response) {
 }
 
 routes = {
-    'GET/users':     getUsers,
+    'GET/users':     getUser,
     'GET/categories':     getCategories,
-    'POST/categories/threads':     getThreadsInCategory,
+    'GET/threads':     getThreadsInCategory,
     'PUT/users':     putUser,
     'POST/users':    postUser,
     'DELETE':        handler_delete,
@@ -74,7 +76,8 @@ module.exports = {
 
     handleRequest: function(request, response) {
         sendHeader(response); // burde kun være nødvendigt at sende headeren her
-        var routedRequest = request['method'] + request.url;
+        var urlParts = url.parse(request.url, true);
+        var routedRequest = request['method'] + urlParts.pathname;
         if(routes[routedRequest]) {
             routes[routedRequest](request, response);
         }
