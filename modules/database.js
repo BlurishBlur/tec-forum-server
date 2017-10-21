@@ -16,8 +16,6 @@ module.exports = {
         }
         else {
             console.log('Connected to database');
-            console.log(queryObj);
-            console.log(queryObj.id);
             var sqlQuery = 'SELECT * FROM users WHERE id = ?;';
             connection.query(sqlQuery, queryObj.id, function (error, result) {
                 connection.release();
