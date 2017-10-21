@@ -47,9 +47,13 @@ module.exports = {
         else {
             console.log('Connected to database');
 
-            var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory FROM lascari_net_db.categories ' +
+            var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory, comments.commentsPerCategory FROM lascari_net_db.categories ' +
             'LEFT JOIN (SELECT threads.id, threads.categoryId, COUNT(*) AS threadsPerCategory FROM lascari_net_db.threads GROUP BY threads.categoryId) threads ' +
-            'ON categories.id=threads.categoryId;';
+            'ON categories.id=threads.categoryId ' +
+            'LEFT JOIN (SELECT threads.categoryId, COUNT(*) AS commentsPerCategory FROM lascari_net_db.threads ' +
+            'LEFT JOIN lascari_net_db.comments ON threads.id = comments.threadId WHERE comments.id AND comments.threadId IS NOT NULL ' +
+            'GROUP BY threads.categoryId) comments ' +
+            'ON categories.id = comments.categoryId';
             connection.query(sqlQuery, function (error, result) {
                 connection.release();
                 if (error) {
@@ -59,10 +63,12 @@ module.exports = {
                 else {
                     console.log(result);
                     for (var i = 0; i < result.length; i++) {
-                        var count;
-                        result[i].threadsPerCategory == undefined ? count = 0 : count = result[i].threadsPerCategory;
+                        var postsCount;
+                        var commentsCount;
+                        result[i].threadsPerCategory == undefined ? postsCount = 0 : postsCount = result[i].threadsPerCategory;
+                        result[i].commentsPerCategory == undefined ? commentsCount = 0 : commentsCount = result[i].commentsPerCategory;
                         categoriesDTO.push( {id: result[i].id, title: result[i].title, 
-                            description: result[i].description, postsCount: count} );
+                            description: result[i].description, postsCount: postsCount, commentsCount: commentsCount} );
                     }
                 }
                 callback(categoriesDTO);
