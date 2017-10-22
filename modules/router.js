@@ -29,6 +29,13 @@ getThreadsInCategory = function(request, response) {
     });
 }
 
+getUserThreads = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getUserThreads(urlParts.query, function(threadsDTO) {
+        response.end(JSON.stringify(threadsDTO));
+    });
+}
+
 putUser = function(request, response) { //create
     request.on('data', function(data) {
         console.log('Received user creation request for: ' + data);
@@ -65,7 +72,8 @@ sendOptions = function (request, response) {
 routes = {
     'GET/users':     getUser,
     'GET/categories':     getCategories,
-    'GET/threads':     getThreadsInCategory,
+    'GET/categories/threads':     getThreadsInCategory,
+    'GET/users/threads':    getUserThreads,
     'PUT/users':     putUser,
     'POST/users':    postUser,
     'DELETE':        handler_delete,

@@ -7,6 +7,36 @@ var pool = mysql.createPool(
 
 module.exports = {
 
+    getUserThreads: function(queryObj, callback) {
+        var threadsDTO = [];
+        pool.getConnection(function(error, connection) {
+        if(error) {
+            connection.release();
+            console.log('Error connecting to database');
+        }
+        else {
+            console.log('Connected to database');
+            var query = 'SELECT * FROM threads WHERE authorId = ?;';
+            connection.query(query, queryObj.id, function (error, result) {
+                connection.release();
+                if (error) {
+                    //throw error;
+                    console.log('Error in the query');
+                }
+                else {
+                    //console.log(result);
+                    for (var i = 0; i < result.length; i++) {
+                        threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
+                            authorId: result[i].authorId, title: result[i].title, 
+                            content: result[i].content, creationDate: result[i].creationDate} );
+                    }
+                }
+                callback(threadsDTO);
+            });
+        }
+        });
+    }, 
+
     getUser: function(queryObj, callback) {
         var userDTO = {};
         pool.getConnection(function(error, connection) {
