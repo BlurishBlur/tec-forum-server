@@ -16,15 +16,17 @@ module.exports = {
         }
         else {
             console.log('Connected to database');
-            var query = 'SELECT * FROM threads WHERE authorId = ?;';
-            connection.query(query, queryObj.id, function (error, result) {
+            var query = 'SELECT * FROM threads WHERE authorId = ? ' + 
+            'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' + 
+            'AND authorId = (SELECT id FROM users WHERE username = ?));';
+            connection.query(query, [queryObj.id, queryObj.id, queryObj.id], function (error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
                     console.log('Error in the query');
                 }
                 else {
-                    //console.log(result);
+                    console.log(result);
                     for (var i = 0; i < result.length; i++) {
                         threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
                             authorId: result[i].authorId, title: result[i].title, 
