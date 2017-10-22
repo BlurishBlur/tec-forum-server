@@ -46,14 +46,15 @@ module.exports = {
         }
         else {
             console.log('Connected to database');
-            var sqlQuery = 'SELECT * FROM users WHERE id = ?;';
-            connection.query(sqlQuery, queryObj.id, function (error, result) {
+            var sqlQuery = 'SELECT * FROM users WHERE id = ? ' + 
+            'OR (NOT EXISTS (SELECT * FROM users WHERE id = ?) AND username = ?);';
+            connection.query(sqlQuery, [queryObj.id, queryObj.id, queryObj.id], function (error, result) {
                 connection.release();
                 if (error) {
                     throw error;
                     console.log('Error in the query');
                 }
-                else {
+                else if (result.length > 0) {
                     //console.log(result);
                     userDTO.id = result[0].id;
                     userDTO.username = result[0].username;
