@@ -16,7 +16,9 @@ module.exports = {
         }
         else {
             console.log('Connected to database');
-            var query = 'SELECT * FROM threads WHERE authorId = ? ' + 
+            var query = 'SELECT * FROM threads ' + 
+            'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROuP BY comments.threadId) comments ON threads.id = comments.threadId ' +            
+            'WHERE authorId = ? ' + 
             'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' + 
             'AND authorId = (SELECT id FROM users WHERE username = ?));';
             connection.query(query, [queryObj.id, queryObj.id, queryObj.id], function (error, result) {
@@ -30,7 +32,8 @@ module.exports = {
                     for (var i = 0; i < result.length; i++) {
                         threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
                             authorId: result[i].authorId, title: result[i].title, 
-                            content: result[i].content, creationDate: result[i].creationDate} );
+                            content: result[i].content, creationDate: result[i].creationDate,
+                            commentCount: result[i].commentCount} );
                     }
                 }
                 callback(threadsDTO);
