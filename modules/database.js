@@ -28,7 +28,7 @@ module.exports = {
                     console.log('Error in the query');
                 }
                 else {
-                    console.log(result);
+                    //console.log(result);
                     for (var i = 0; i < result.length; i++) {
                         threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
                             authorId: result[i].authorId, title: result[i].title, 
