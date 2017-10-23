@@ -17,7 +17,7 @@ module.exports = {
         else {
             console.log('Connected to database');
             var query = 'SELECT * FROM threads ' + 
-            'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROuP BY comments.threadId) comments ON threads.id = comments.threadId ' +            
+            'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROUP BY comments.threadId) comments ON threads.id = comments.threadId ' +            
             'WHERE authorId = ? ' + 
             'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' + 
             'AND authorId = (SELECT id FROM users WHERE username = ?));';
@@ -28,7 +28,7 @@ module.exports = {
                     console.log('Error in the query');
                 }
                 else {
-                    //console.log(result);
+                    console.log(result);
                     for (var i = 0; i < result.length; i++) {
                         threadsDTO.push( {id: result[i].id, categoryId: result[i].categoryId, 
                             authorId: result[i].authorId, title: result[i].title, 
@@ -41,6 +41,70 @@ module.exports = {
         }
         });
     }, 
+
+    getThread: function(queryObj, callback) {
+        var threadDTO = {};
+        pool.getConnection(function(error, connection) {
+            if(error) {
+                connection.release();
+                console.log('Error connection to database');
+            }
+            else {
+                console.log('Connection to database');
+                var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
+                'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
+                'WHERE threads.id=?;';
+                connection.query(sqlQuery, queryObj.id, function(error, result) {
+                    connection.release();
+                    if(error) {
+                        throw error;
+                        console.log('Error in the query');
+                    }
+                    else if (result.length > 0) {
+                        threadDTO.id = result[0].id;
+                        threadDTO.authorId = result[0].authorId;
+                        threadDTO.author = result[0].username;
+                        threadDTO.title = result[0].title;
+                        threadDTO.content = result[0].content;
+                        threadDTO.creationDate = result[0].creationDate;
+                    }
+                    callback(threadDTO);
+                });
+            }
+        });
+    },
+
+    getThreadComments: function(queryObj, callback) {
+        var commentsDTO = [];
+        pool.getConnection(function(error, connection) {
+            if(error) {
+                connection.release();
+                console.log('Error connection to database');
+            }
+            else {
+                console.log('Connection to database');
+                var sqlQuery = 'SELECT comments.id, comments.threadId, comments.authorId, users.username, comments.content, comments.creationDate FROM lascari_net_db.comments ' +
+                'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON comments.authorId = users.id ' + 
+                'WHERE comments.threadId = ?;';
+                connection.query(sqlQuery, queryObj.id, function(error, result) {
+                    connection.release();
+                    if(error) {
+                        throw error;
+                        console.log('Error in the query');
+                    }
+                    else {
+                        for (var i = 0; i < result.length; i++) { 
+                            var date = new Date(result[i].creationDate);
+                            var temp;
+                            temp = date.getHours() + ':' + date.getMinutes() + ' | ' + date.getDate() + ' ' + date.toLocaleString('en-US', { month: "long" }) + ' ' + date.getFullYear();                
+                            commentsDTO.push( { id: result[i].id, authorId: result[i].authorId, author: result[i].username, content: result[i].content, creationDate: temp} );
+                         }
+                    }
+                    callback(commentsDTO);
+                });
+            }
+        });
+    },
 
     getUser: function(queryObj, callback) {
         var userDTO = {};

@@ -16,6 +16,20 @@ getUser = function(request, response) {
     });
 }
 
+getThread = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getThread(urlParts.query, function(threadDTO) {
+        response.end(JSON.stringify(threadDTO));
+    });
+}
+
+getThreadComments = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getThreadComments(urlParts.query, function(commentsDTO) {
+        response.end(JSON.stringify(commentsDTO));
+    });
+}
+
 getCategories = function(request, response) {
     database.getCategories(function(categoriesDTO) {
         response.end(JSON.stringify(categoriesDTO));
@@ -71,6 +85,8 @@ sendOptions = function (request, response) {
 
 routes = {
     'GET/users':     getUser,
+    'GET/thread':   getThread,
+    'GET/thread/comments':  getThreadComments,
     'GET/categories':     getCategories,
     'GET/categories/threads':     getThreadsInCategory,
     'GET/users/threads':    getUserThreads,
