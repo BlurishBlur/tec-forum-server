@@ -3,14 +3,8 @@ var database = require('./database.js');
 var url = require('url');
 
 
-sendHeader = function (response) {
-    response.writeHead(200, {'Content-Type': 'application/json',
-                             'Access-Control-Allow-Origin': '*',
-                             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
-}
-
-sendHeader404 = function (response) {
-    response.writeHead(404, {'Content-Type': 'application/json',
+sendHeader = function (httpCode, response) {
+    response.writeHead(httpCode, {'Content-Type': 'application/json',
                              'Access-Control-Allow-Origin': '*',
                              'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
 }
@@ -109,12 +103,12 @@ module.exports = {
         var urlParts = url.parse(request.url, true);
         var routedRequest = request['method'] + urlParts.pathname;
         if(routes[routedRequest]) {
-            sendHeader(response); // burde kun være nødvendigt at sende headeren her
+            sendHeader(200, response); // burde kun være nødvendigt at sende headeren her
             routes[routedRequest](request, response);
         }
         else {
             console.log('Could not find method ' + routedRequest);
-            sendHeader404(response);
+            sendHeader(404, response);
             response.end(null); // egentligt burde statussen fra senderHeader sættes til 404 i stedet for 200 her
         }
     }
