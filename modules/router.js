@@ -1,12 +1,15 @@
 #!/usr/bin/env node
+
 var database = require('./database.js');
 var url = require('url');
 
 
-sendHeader = function (httpCode, response) {
-    response.writeHead(httpCode, {'Content-Type': 'application/json',
-                             'Access-Control-Allow-Origin': '*',
-                             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
+sendHeader = function(httpCode, response) {
+    response.writeHead(httpCode, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'
+    });
 }
 
 getUser = function(request, response) {
@@ -70,7 +73,7 @@ postUser = function(request, response) { //login
     })
 }
 
-handler_delete = function (request, response) {
+handler_delete = function(request, response) {
     /*request.on('data', function(data) {
         deleteFromArray(data);
         sendHeader(response);
@@ -78,35 +81,34 @@ handler_delete = function (request, response) {
     });*/
 }
 
-sendOptions = function (request, response) {
+sendOptions = function(request, response) {
     //sendHeader(response);
     response.end(null);
 }
 
 routes = {
-    'GET/users':     getUser,
-    'GET/thread':   getThread,
-    'GET/thread/comments':  getThreadComments,
-    'GET/categories':     getCategories,
-    'GET/categories/threads':     getThreadsInCategory,
-    'GET/users/threads':    getUserThreads,
-    'PUT/users':     putUser,
-    'POST/users':    postUser,
-    'DELETE':        handler_delete,
-    'OPTIONS':       sendOptions
+    'GET/users': getUser,
+    'GET/thread': getThread,
+    'GET/thread/comments': getThreadComments,
+    'GET/categories': getCategories,
+    'GET/categories/threads': getThreadsInCategory,
+    'GET/users/threads': getUserThreads,
+    'PUT/users': putUser,
+    'POST/users': postUser,
+    'DELETE': handler_delete,
+    'OPTIONS': sendOptions
 }
 
 module.exports = {
 
     handleRequest: function(request, response) {
-        
+
         var urlParts = url.parse(request.url, true);
         var routedRequest = request['method'] + urlParts.pathname;
-        if(routes[routedRequest]) {
+        if (routes[routedRequest]) {
             sendHeader(200, response); // burde kun være nødvendigt at sende headeren her
             routes[routedRequest](request, response);
-        }
-        else {
+        } else {
             console.log('Could not find method ' + routedRequest);
             sendHeader(404, response);
             response.end(null); // egentligt burde statussen fra senderHeader sættes til 404 i stedet for 200 her

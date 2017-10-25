@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var mysql = require('mysql');
 var config = require('../cfg/config.json');
 var pool = mysql.createPool(
@@ -8,7 +9,7 @@ var pool = mysql.createPool(
 console.log('1: get users, 2: create users, 3: delete users');
 
 function execute(number) {
-    switch(number) {
+    switch (number) {
         case '1':
             getAllUsers();
             break;
@@ -31,20 +32,18 @@ process.openStdin().addListener("data", function(d) {
 
 getAllUsers = function() {
     pool.getConnection(function(error, connection) {
-        if(error) {
+        if (error) {
             connection.release();
             console.log('Error connecting to database');
-        }
-        else {
+        } else {
             console.log('Connected to database');
 
-            connection.query('SELECT * FROM users;', function (error, result) {
+            connection.query('SELECT * FROM users;', function(error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
                     console.log('Error in the query');
-                }
-                else {
+                } else {
                     console.log(result);
                 }
             });
@@ -54,20 +53,18 @@ getAllUsers = function() {
 
 createTestUsers = function() {
     pool.getConnection(function(error, connection) {
-        if(error) {
+        if (error) {
             connection.release();
             console.log('Error connecting to database');
-        }
-        else {
+        } else {
             console.log('Connected to database');
             var query = "INSERT INTO users(username, password) VALUES('Antonio', '123'), ('Niels', '123'), ('Niclas', '123');";
-            connection.query(query, function (error, result) {
+            connection.query(query, function(error, result) {
                 connection.release();
                 if (error) {
                     throw error;
                     console.log('Error in the query');
-                }
-                else {
+                } else {
                     console.log('Successfully created users');
                 }
             });
@@ -77,20 +74,18 @@ createTestUsers = function() {
 
 deleteAllUsers = function() {
     pool.getConnection(function(error, connection) {
-        if(error) {
+        if (error) {
             connection.release();
             console.log('Error connecting to database');
-        }
-        else {
+        } else {
             console.log('Connected to database');
 
-            connection.query('DELETE from users;', function (error, result) {
+            connection.query('DELETE from users;', function(error, result) {
                 connection.release();
                 if (error) {
                     //throw error;
                     console.log('Error in the query');
-                }
-                else {
+                } else {
                     console.log(result);
                 }
             });
