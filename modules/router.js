@@ -9,6 +9,12 @@ sendHeader = function (response) {
                              'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
 }
 
+sendHeader404 = function (response) {
+    response.writeHead(404, {'Content-Type': 'application/json',
+                             'Access-Control-Allow-Origin': '*',
+                             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'});
+}
+
 getUser = function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getUser(urlParts.query, function(userDTO) {
@@ -99,15 +105,17 @@ routes = {
 module.exports = {
 
     handleRequest: function(request, response) {
-        sendHeader(response); // burde kun være nødvendigt at sende headeren her
+        
         var urlParts = url.parse(request.url, true);
         var routedRequest = request['method'] + urlParts.pathname;
         if(routes[routedRequest]) {
+            sendHeader(response); // burde kun være nødvendigt at sende headeren her
             routes[routedRequest](request, response);
         }
         else {
             console.log('Could not find method ' + routedRequest);
-            response.end("404 - Not found"); // egentligt burde statussen fra senderHeader sættes til 404 i stedet for 200 her
+            sendHeader404(response);
+            response.end(null); // egentligt burde statussen fra senderHeader sættes til 404 i stedet for 200 her
         }
     }
 }
