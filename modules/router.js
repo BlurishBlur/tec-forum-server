@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-
 var database = require('./database.js');
 var url = require('url');
+var event = require('events');
 
+var eventEmitter = new event.EventEmitter();
 
 sendHeader = function(httpCode, response) {
     response.writeHead(httpCode, {
@@ -25,17 +26,30 @@ getThread = function(request, response) {
         response.end(JSON.stringify(threadDTO));
     });
 }
-
+var listeners = [];
 getThreadComments = function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadComments(urlParts.query, function(commentsDTO) {
-        response.end(JSON.stringify(commentsDTO));
-    });
+    listeners.push({response: response, request: request});
+    console.log('add listener, listener lenght: '+listeners.length);
+}
+
+sendResponse = function() {
+    listeners.forEach(function(listenerElement) {
+        var urlParts = url.parse(listenerElement.request.url, true);
+        database.getThreadComments(urlParts.query, function(commentsDTO) {
+            listenerElement.response.end(JSON.stringify(commentsDTO)); 
+            var index = listeners.indexOf(listenerElement);
+            listeners.splice(index, 1);
+            console.log('index of listener: '+index);         
+        });
+    }); 
+
+    //console.log(listeners.length);
 }
 
 getCategories = function(request, response) {
     database.getCategories(function(categoriesDTO) {
         response.end(JSON.stringify(categoriesDTO));
+        sendResponse();
     });
 }
 
