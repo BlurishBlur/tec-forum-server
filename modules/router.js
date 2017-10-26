@@ -102,9 +102,11 @@ routes = {
 module.exports = {
 
     handleRequest: function(request, response) {
-
         var urlParts = url.parse(request.url, true);
         var routedRequest = request['method'] + urlParts.pathname;
+        if (request['method'] == 'OPTIONS') {
+            routedRequest = request['method'];
+        }
         if (routes[routedRequest]) {
             sendHeader(200, response); // burde kun være nødvendigt at sende headeren her
             routes[routedRequest](request, response);
