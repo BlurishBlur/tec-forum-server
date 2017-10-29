@@ -64,7 +64,7 @@ router.post('/users', function(request, response) {
             console.log(logInDTO);
             response.end(JSON.stringify(logInDTO));
         });
-    })
+    });
 })
 
 
