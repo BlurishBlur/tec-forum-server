@@ -67,6 +67,7 @@ router.post('/users', function(request, response) {
     })
 })
 
+
 var server = http.createServer(function(request, response) {
     console.log("Received request for " + request['method'] + request.url);
     router.handleRequest(request, response);
