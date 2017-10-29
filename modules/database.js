@@ -51,35 +51,23 @@ module.exports = {
                     commentCount: result[i].commentCount
                 });
             }
-        })
+        });
     },
 
     getThread: function(queryObj, callback) {
-        var threadDTO = {};
-        pool.getConnection(function(error, connection) {
-            if (error) {
-                connection.release();
-                console.log('Error connection to database');
-            } else {
-                console.log('Connection to database');
-                var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
-                    'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
-                    'WHERE threads.id=?;';
-                connection.query(sqlQuery, queryObj.id, function(error, result) {
-                    connection.release();
-                    if (error) {
-                        throw error;
-                        console.log('Error in the query');
-                    } else if (result.length > 0) {
-                        threadDTO.id = result[0].id;
-                        threadDTO.authorId = result[0].authorId;
-                        threadDTO.author = result[0].username;
-                        threadDTO.title = result[0].title;
-                        threadDTO.content = result[0].content;
-                        threadDTO.creationDate = result[0].creationDate;
-                    }
-                    callback(threadDTO);
-                });
+        var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
+            'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
+            'WHERE threads.id=?;';
+        var args = queryObj.id;
+
+        query(sqlQuery, args, callback, function(DTO, result) {
+            if (result.length > 0) {
+                threadDTO.id = result[0].id;
+                threadDTO.authorId = result[0].authorId;
+                threadDTO.author = result[0].username;
+                threadDTO.title = result[0].title;
+                threadDTO.content = result[0].content;
+                threadDTO.creationDate = result[0].creationDate;
             }
         });
     },
