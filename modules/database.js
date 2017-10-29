@@ -6,44 +6,52 @@ var pool = mysql.createPool(
     config.database
 );
 
+function query(sqlQuery, args, callback, action) {
+    var DTO = [];
+    pool.getConnection(function(error, connection) {
+        if (error) {
+            connection.release();
+            console.log('Error connecting to database');
+        } else {
+            console.log('Connected to database');
+            connection.query(sqlQuery, args, function(error, result) {
+                connection.release();
+                if (error) {
+                    //throw error;
+                    console.log('Error in the query');
+                } else {
+                    action(DTO, result);
+                    console.log(result);
+                }
+                callback(DTO);
+            });
+        }
+    });
+}
+
 module.exports = {
 
     getUserThreads: function(queryObj, callback) {
-        var threadsDTO = [];
-        pool.getConnection(function(error, connection) {
-            if (error) {
-                connection.release();
-                console.log('Error connecting to database');
-            } else {
-                console.log('Connected to database');
-                var query = 'SELECT * FROM threads ' +
-                    'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROUP BY comments.threadId) comments ON threads.id = comments.threadId ' +
-                    'WHERE authorId = ? ' +
-                    'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' +
-                    'AND authorId = (SELECT id FROM users WHERE username = ?));';
-                connection.query(query, [queryObj.id, queryObj.id, queryObj.id], function(error, result) {
-                    connection.release();
-                    if (error) {
-                        //throw error;
-                        console.log('Error in the query');
-                    } else {
-                        console.log(result);
-                        for (var i = 0; i < result.length; i++) {
-                            threadsDTO.push({
-                                id: result[i].id,
-                                categoryId: result[i].categoryId,
-                                authorId: result[i].authorId,
-                                title: result[i].title,
-                                content: result[i].content,
-                                creationDate: result[i].creationDate,
-                                commentCount: result[i].commentCount
-                            });
-                        }
-                    }
-                    callback(threadsDTO);
+        var sqlQuery = 'SELECT * FROM threads ' +
+            'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROUP BY comments.threadId) comments ON threads.id = comments.threadId ' +
+            'WHERE authorId = ? ' +
+            'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' +
+            'AND authorId = (SELECT id FROM users WHERE username = ?));';
+        var args = [queryObj.id, queryObj.id, queryObj.id];
+
+        query(sqlQuery, args, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                    id: result[i].id,
+                    categoryId: result[i].categoryId,
+                    authorId: result[i].authorId,
+                    title: result[i].title,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate,
+                    commentCount: result[i].commentCount
                 });
             }
-        });
+        })
     },
 
     getThread: function(queryObj, callback) {
