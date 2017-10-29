@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 var database = require('./database.js');
 var url = require('url');
-var event = require('events');
 
-var eventEmitter = new event.EventEmitter();
+var listeners = [];
+
 
 sendHeader = function(httpCode, response) {
     response.writeHead(httpCode, {
@@ -26,13 +26,24 @@ getThread = function(request, response) {
         response.end(JSON.stringify(threadDTO));
     });
 }
-var listeners = [];
 getThreadComments = function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getThreadComments(urlParts.query, function(commentsDTO) {
+        response.end(JSON.stringify(commentsDTO));          
+    });
+}
+
+getThreadCommentsPoll = function(request, response) {
     listeners.push({response: response, request: request});
     console.log('add listener, listener lenght: '+listeners.length);
 }
 
-sendResponse = function() {
+putComment = function(request, response) {
+    sendThreadCommentsResponse();
+    console.log("Comment received, all listeners updated!");
+}
+
+sendThreadCommentsResponse = function() {
     listeners.forEach(function(listenerElement) {
         var urlParts = url.parse(listenerElement.request.url, true);
         database.getThreadComments(urlParts.query, function(commentsDTO) {
@@ -49,7 +60,6 @@ sendResponse = function() {
 getCategories = function(request, response) {
     database.getCategories(function(categoriesDTO) {
         response.end(JSON.stringify(categoriesDTO));
-        sendResponse();
     });
 }
 
@@ -104,6 +114,8 @@ routes = {
     'GET/users': getUser,
     'GET/thread': getThread,
     'GET/thread/comments': getThreadComments,
+    'GET/thread/commentsPoll': getThreadCommentsPoll,
+    'PUT/thread/submitComment': putComment,
     'GET/categories': getCategories,
     'GET/categories/threads': getThreadsInCategory,
     'GET/users/threads': getUserThreads,
