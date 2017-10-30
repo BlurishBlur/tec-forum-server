@@ -2,7 +2,6 @@
 
 var url = require('url');
 
-var listeners = []; // TODO: SKAL FJERNES EFTER REFACTOR
 sendHeader = function(httpCode, response) {
     response.writeHead(httpCode, {
         'Content-Type': 'application/json',
@@ -11,47 +10,6 @@ sendHeader = function(httpCode, response) {
     });
 }
 
-// TODO: SKAL FJERNES EFTER REFACTOR
-getThreadComments = function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadComments(urlParts.query, function(commentsDTO) {
-        response.end(JSON.stringify(commentsDTO));          
-    });
-}
-// TODO: SKAL FJERNES EFTER REFACTOR
-getThreadCommentsPoll = function(request, response) {
-    listeners.push({response: response, request: request});
-    console.log('add listener, listener lenght: '+listeners.length);
-}
-// TODO: SKAL FJERNES EFTER REFACTOR
-putComment = function(request, response) {
-
-    request.on('data', function(data) {
-        database.saveComment(data, function() {
-            sendThreadCommentsResponse();
-        console.log(JSON.parse(data));
-            console.log("Comment received, all listeners updated!");
-        });
-    
-    });
-
-}
-// TODO: SKAL FJERNES EFTER REFACTOR
-sendThreadCommentsResponse = function() {
-    listeners.forEach(function(listenerElement) {
-        var urlParts = url.parse(listenerElement.request.url, true);
-        database.getThreadComments(urlParts.query, function(commentsDTO) {
-            listenerElement.response.end(JSON.stringify(commentsDTO)); 
-            var index = listeners.indexOf(listenerElement);
-            listeners.splice(index, 1);
-            console.log('index of listener: '+index);         
-    }); 
-        });
-    //console.log(listeners.length);
-
-}
-
-}
 handler_delete = function(request, response) {
     /*request.on('data', function(data) {
         deleteFromArray(data);
