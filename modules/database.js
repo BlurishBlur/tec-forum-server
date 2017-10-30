@@ -191,7 +191,7 @@ module.exports = {
                     } else {
                         console.log('Successfully');
                     }
-                    callback();
+                    callback(""+error);
                 })
             }
         })

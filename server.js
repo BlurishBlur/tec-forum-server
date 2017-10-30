@@ -60,8 +60,9 @@ router.put('/users', function(request, response) {
 
 router.put('/thread/submitComment', function(request, response) {
     request.on('data', function(data) {
-        database.saveComment(data, function() {
+        database.saveComment(data, function(error) {
             console.log("Comment received!");
+            response.end(error);
         });  
     });
 })
