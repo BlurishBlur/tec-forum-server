@@ -7,9 +7,6 @@ var router = require('./modules/router.js');
 var database = require('./modules/database.js');
 var url = require('url');
 
-// Array for storing thread listeners
-var listeners = [];
-
 router.get('/users', function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getUser(urlParts.query, function(userDTO) {
@@ -29,11 +26,6 @@ router.get('/thread/comments', function(request, response) {
     database.getThreadComments(urlParts.query, function(commentsDTO) {
         response.end(JSON.stringify(commentsDTO));
     });
-})
-
-router.get('/thread/commentsPoll', function(request, response) {
-    listeners.push({response: response, request: request});
-    console.log('add listener, listener lenght: '+listeners.length);
 })
 
 router.get('/categories', function(request, response) {
@@ -69,8 +61,7 @@ router.put('/users', function(request, response) {
 router.put('/thread/submitComment', function(request, response) {
     request.on('data', function(data) {
         database.saveComment(data, function() {
-            sendThreadCommentsResponse();
-            console.log("Comment received, all listeners updated!");
+            console.log("Comment received!");
         });  
     });
 })
