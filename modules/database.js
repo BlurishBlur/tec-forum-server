@@ -267,6 +267,28 @@ module.exports = {
         });
     },
 
+    saveComment: function(data, callback) {
+        pool.getConnection(function(error, connection) {
+            if(error) {
+                throw error;
+                connection.release();
+            } else {
+                var query = "INSERT INTO comments(threadId, authorId, content) VALUES(?, ?, ?)";
+                var commentObj = JSON.parse(data);
+                connection.query(query, [commentObj.threadId, commentObj.authorId, commentObj.comment], function(error, result) {
+                    connection.release();
+                    if (error) {
+                        throw error;
+                        console.log('Error in the query');
+                    } else {
+                        console.log('Successfully');
+                    }
+                    callback();
+                })
+            }
+        })
+    },
+
     logIn: function(data, callback) {
         var logInDTO = { loggedIn: false, id: -1, message: '' };
         pool.getConnection(function(error, connection) {
@@ -290,6 +312,7 @@ module.exports = {
                         logInDTO.loggedIn = (result.length > 0);
                         if (logInDTO.loggedIn === true) {
                             logInDTO.id = result[0].id;
+                            console.log(result[0].id);
                         } else {
                             logInDTO.message = 'Wrong username or password.';
                         }

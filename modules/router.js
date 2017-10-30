@@ -39,8 +39,14 @@ getThreadCommentsPoll = function(request, response) {
 }
 
 putComment = function(request, response) {
-    sendThreadCommentsResponse();
-    console.log("Comment received, all listeners updated!");
+    request.on('data', function(data) {
+        console.log(JSON.parse(data));
+        database.saveComment(data, function() {
+            sendThreadCommentsResponse();
+            console.log("Comment received, all listeners updated!");
+        });
+    });
+    
 }
 
 sendThreadCommentsResponse = function() {
