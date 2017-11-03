@@ -48,6 +48,13 @@ router.get('/users/threads', function(request, response) {
     });
 })
 
+router.get('/users/comments', function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getUserComments(urlParts.query, function(commentsDTO) {
+        response.end(JSON.stringify(commentsDTO));
+    });
+})
+
 router.put('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received user creation request for: ' + data);
@@ -63,7 +70,7 @@ router.put('/thread/submitComment', function(request, response) {
         database.saveComment(data, function(error) {
             console.log("Comment received!");
             response.end(error);
-        });  
+        });
     });
 })
 
@@ -82,17 +89,17 @@ sendThreadCommentsResponse = function() {
     listeners.forEach(function(listenerElement) {
         var urlParts = url.parse(listenerElement.request.url, true);
         database.getThreadComments(urlParts.query, function(commentsDTO) {
-            listenerElement.response.end(JSON.stringify(commentsDTO)); 
+            listenerElement.response.end(JSON.stringify(commentsDTO));
             var index = listeners.indexOf(listenerElement);
             listeners.splice(index, 1);
-            console.log('index of listener: '+index);         
-        }); 
+            console.log('index of listener: ' + index);
+        });
     });
 }
 
 var server = http.createServer(function(request, response) {
     console.log("Received request for " + request['method'] + request.url);
-    
+
     router.handleRequest(request, response);
 });
 
