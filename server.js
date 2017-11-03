@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var http = require('http');
+
 var config = require('./cfg/config.json');
 var router = require('./modules/router.js');
 var database = require('./modules/database.js');
@@ -47,12 +48,28 @@ router.get('/users/threads', function(request, response) {
     });
 })
 
+router.get('/users/comments', function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getUserComments(urlParts.query, function(commentsDTO) {
+        response.end(JSON.stringify(commentsDTO));
+    });
+})
+
 router.put('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received user creation request for: ' + data);
         database.saveUser(data, function(saveUserDTO) {
             console.log(saveUserDTO);
             response.end(JSON.stringify(saveUserDTO));
+        });
+    });
+})
+
+router.put('/thread/submitComment', function(request, response) {
+    request.on('data', function(data) {
+        database.saveComment(data, function(error) {
+            console.log("Comment received!");
+            response.end(error);
         });
     });
 })
@@ -67,6 +84,7 @@ router.post('/users', function(request, response) {
     });
 })
 
+<<<<<<< HEAD
 router.delete('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received delete request for: ' + data);
@@ -76,9 +94,24 @@ router.delete('/users', function(request, response) {
         });
     });
 })
+=======
+// Method for responding to listeners
+sendThreadCommentsResponse = function() {
+    listeners.forEach(function(listenerElement) {
+        var urlParts = url.parse(listenerElement.request.url, true);
+        database.getThreadComments(urlParts.query, function(commentsDTO) {
+            listenerElement.response.end(JSON.stringify(commentsDTO));
+            var index = listeners.indexOf(listenerElement);
+            listeners.splice(index, 1);
+            console.log('index of listener: ' + index);
+        });
+    });
+}
+>>>>>>> origin/master
 
 var server = http.createServer(function(request, response) {
     console.log("Received request for " + request['method'] + request.url);
+
     router.handleRequest(request, response);
 });
 
