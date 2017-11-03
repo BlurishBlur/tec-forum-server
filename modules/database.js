@@ -31,18 +31,20 @@ function query(sqlQuery, args, DTO, callback, action) {
 module.exports = {
 
     getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
-        var sqlQuery = 'SELECT * FROM comments WHERE authorId = ?;';
+        var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' + 
+        'FROM lascari_net_db.comments LEFT JOIN ' + 
+        '(SELECT threads.id, threads.title FROM lascari_net_db.threads) threads ON threads.id = comments.threadId ' +
+        'WHERE comments.authorId = ?;';
         var args = queryObj.id;
         var DTO = [];
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
             for (var i = 0; i < result.length; i++) {
                 DTO.push({
-                    id: result[i].id,
                     threadId: result[i].threadId,
-                    authorId: result[i].authorId,
                     content: result[i].content,
-                    creationDate: result[i].creationDate
+                    creationDate: result[i].creationDate,
+                    threadTitle: result[i].title
                 });
             }
         });
