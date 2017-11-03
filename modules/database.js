@@ -51,11 +51,13 @@ module.exports = {
     }, 
 
     getUserThreads: function(queryObj, callback) {
-        var sqlQuery = 'SELECT * FROM threads ' +
+        var sqlQuery = 'SELECT threads.id, threads.title, threads.content, threads.creationDate, comments.commentCount, commentActivity.latestActivity FROM threads ' +
             'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROUP BY comments.threadId) comments ON threads.id = comments.threadId ' +
+            'LEFT JOIN (SELECT comments.threadId, comments.creationDate as latestActivity FROM lascari_net_db.comments ORDER BY creationDate DESC LIMIT 1) commentActivity ON threads.id = commentActivity.threadId ' +
             'WHERE authorId = ? ' +
             'OR (NOT EXISTS (SELECT * FROM threads WHERE authorId = ?) ' +
-            'AND authorId = (SELECT id FROM users WHERE username = ?));';
+            'AND authorId = (SELECT id FROM users WHERE username = ?));'
+
         var args = [queryObj.id, queryObj.id, queryObj.id];
         var DTO = [];
 
@@ -63,12 +65,11 @@ module.exports = {
             for (var i = 0; i < result.length; i++) {
                 DTO.push({
                     id: result[i].id,
-                    categoryId: result[i].categoryId,
-                    authorId: result[i].authorId,
                     title: result[i].title,
                     content: result[i].content,
                     creationDate: result[i].creationDate,
-                    commentCount: result[i].commentCount
+                    commentCount: result[i].commentCount,
+                    latestActivity: result[i].latestActivity
                 });
             }
         });
