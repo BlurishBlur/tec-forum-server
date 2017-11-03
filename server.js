@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var http = require('http');
+
 var config = require('./cfg/config.json');
 var router = require('./modules/router.js');
 var database = require('./modules/database.js');
@@ -57,6 +58,15 @@ router.put('/users', function(request, response) {
     });
 })
 
+router.put('/thread/submitComment', function(request, response) {
+    request.on('data', function(data) {
+        database.saveComment(data, function(error) {
+            console.log("Comment received!");
+            response.end(error);
+        });  
+    });
+})
+
 router.post('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received login request for: ' + data);
@@ -67,9 +77,22 @@ router.post('/users', function(request, response) {
     });
 })
 
+// Method for responding to listeners
+sendThreadCommentsResponse = function() {
+    listeners.forEach(function(listenerElement) {
+        var urlParts = url.parse(listenerElement.request.url, true);
+        database.getThreadComments(urlParts.query, function(commentsDTO) {
+            listenerElement.response.end(JSON.stringify(commentsDTO)); 
+            var index = listeners.indexOf(listenerElement);
+            listeners.splice(index, 1);
+            console.log('index of listener: '+index);         
+        }); 
+    });
+}
 
 var server = http.createServer(function(request, response) {
     console.log("Received request for " + request['method'] + request.url);
+    
     router.handleRequest(request, response);
 });
 

@@ -30,6 +30,19 @@ function query(sqlQuery, args, DTO, callback, action) {
 
 module.exports = {
 
+    getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
+        var sqlQuery = '';
+        var args = queryObj.id;
+        var DTO = [];
+
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                });
+            }
+        });
+    }, 
+
     getUserThreads: function(queryObj, callback) {
         var sqlQuery = 'SELECT * FROM threads ' +
             'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentCount FROM lascari_net_db.comments GROUP BY comments.threadId) comments ON threads.id = comments.threadId ' +
@@ -85,7 +98,11 @@ module.exports = {
                 var date = new Date(result[i].creationDate);
                 var temp;
                 temp = date.getHours() + ':' + date.getMinutes() + ' | ' + date.getDate() + ' ' + date.toLocaleString('en-US', { month: "long" }) + ' ' + date.getFullYear();
-                DTO.push({ id: result[i].id, authorId: result[i].authorId, author: result[i].username, content: result[i].content, creationDate: temp });
+                DTO.push({ id: result[i].id, 
+                    authorId: result[i].authorId, 
+                    author: result[i].username, 
+                    content: result[i].content, 
+                    creationDate: temp });
             }
         });
     },
@@ -173,6 +190,28 @@ module.exports = {
             console.log('Successfully created user ' + data);
             DTO.message = 'User created.';
         });
+    },
+
+    saveComment: function(data, callback) {
+        pool.getConnection(function(error, connection) {
+            if(error) {
+                throw error;
+                connection.release();
+            } else {
+                var query = "INSERT INTO comments(threadId, authorId, content) VALUES(?, ?, ?)";
+                var commentObj = JSON.parse(data);
+                connection.query(query, [commentObj.threadId, commentObj.authorId, commentObj.comment], function(error, result) {
+                    connection.release();
+                    if (error) {
+                        throw error;
+                        console.log('Error in the query');
+                    } else {
+                        console.log('Successfully');
+                    }
+                    callback(""+error);
+                })
+            }
+        })
     },
 
     logIn: function(data, callback) {
