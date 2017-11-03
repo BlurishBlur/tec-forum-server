@@ -84,7 +84,6 @@ router.post('/users', function(request, response) {
     });
 })
 
-<<<<<<< HEAD
 router.delete('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received delete request for: ' + data);
@@ -94,20 +93,6 @@ router.delete('/users', function(request, response) {
         });
     });
 })
-=======
-// Method for responding to listeners
-sendThreadCommentsResponse = function() {
-    listeners.forEach(function(listenerElement) {
-        var urlParts = url.parse(listenerElement.request.url, true);
-        database.getThreadComments(urlParts.query, function(commentsDTO) {
-            listenerElement.response.end(JSON.stringify(commentsDTO));
-            var index = listeners.indexOf(listenerElement);
-            listeners.splice(index, 1);
-            console.log('index of listener: ' + index);
-        });
-    });
-}
->>>>>>> origin/master
 
 var server = http.createServer(function(request, response) {
     console.log("Received request for " + request['method'] + request.url);
