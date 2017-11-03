@@ -179,6 +179,7 @@ module.exports = {
 
     deleteUser: function(data, callback) {
         var sqlQuery = "DELETE FROM users WHERE username = ? AND id = ?;";
+        var userObj = JSON.parse(data);
         var args = [userObj.username, userObj.id];
         var DTO = {};
 
