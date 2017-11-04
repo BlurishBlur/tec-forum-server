@@ -243,7 +243,7 @@ module.exports = {
     },
 
     logIn: function(data, callback) {
-        var sqlQuery = "SELECT id FROM users WHERE username = ? AND password = ?;";
+        var sqlQuery = "SELECT id, username FROM users WHERE username = ? AND password = ?;";
         var userObj = JSON.parse(data);
         var args = [userObj.username, userObj.password];
         var DTO = {};
@@ -252,6 +252,7 @@ module.exports = {
             DTO.loggedIn = (result.length > 0);
             if (DTO.loggedIn === true) {
                 DTO.id = result[0].id;
+                DTO.username = result[0].username;
             } else {
                 DTO.message = 'Wrong username or password.';
             }
