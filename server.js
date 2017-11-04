@@ -90,6 +90,16 @@ router.post('/users', function(request, response) {
     });
 })
 
+router.post('/change', function(request, response) {
+    request.on('data', function(data) {
+        console.log('Received change request for: ' + data);
+        database.changePassword(data, function(changeDTO) {
+            console.log(changeDTO);
+            response.end(JSON.stringify(changeDTO));
+        });
+    });
+})
+
 router.delete('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received delete request for: ' + data);

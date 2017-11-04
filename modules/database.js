@@ -259,6 +259,18 @@ module.exports = {
                 DTO.message = 'Wrong username or password.';
             }
         });
+    },
+
+    changePassword: function(data, callback) {
+        var sqlQuery = "UPDATE users SET password = ? WHERE username = ? AND id = ?;";
+        var userObj = JSON.parse(data);
+        var args = [userObj.newPassword, userObj.username, userObj.id];
+        var DTO = {};
+        
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            console.log('Successfully changed password to: ' + args);
+            DTO.message = 'Password Changed';
+        });
     }
 
 }
