@@ -30,6 +30,18 @@ function query(sqlQuery, args, DTO, callback, action) {
 
 module.exports = {
 
+    getCategoryName: function(queryObj, callback) {
+        var sqlQuery = 'SELECT categories.title FROM lascari_net_db.categories WHERE categories.id = ?;';
+        var args = queryObj.id;
+        var categoryNameDTO = {};
+
+        query(sqlQuery, args, categoryNameDTO, callback, function(categoryNameDTO, result) {
+            for(var i = 0; i < result.length; i++) {
+                categoryNameDTO.categoryName = result[i].title
+            }
+        })
+    },
+
     getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
         var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' +
             'FROM lascari_net_db.comments LEFT JOIN ' +

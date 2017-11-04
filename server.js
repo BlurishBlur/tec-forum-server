@@ -35,6 +35,13 @@ router.get('/thread/comments', function(request, response) {
     });
 })
 
+router.get('/categoryName', function(request, response) {
+    var urlParts = url.parse(request.url, true);
+    database.getCategoryName(urlParts.query, function(categoryNameDTO) {
+        response.end(JSON.stringify(categoryNameDTO));
+    });
+})
+
 router.get('/categories', function(request, response) {
     database.getCategories(function(categoriesDTO) {
         response.end(JSON.stringify(categoriesDTO));
