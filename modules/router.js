@@ -58,7 +58,6 @@ module.exports = {
     },
 
     delete: function(path, func) {
-        console.log(path);
         routes['DELETE' + path] = func;
     }
 

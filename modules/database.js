@@ -12,7 +12,7 @@ function query(sqlQuery, args, DTO, callback, action) {
             connection.release();
             console.log('Error connecting to database');
         } else {
-            console.log('Connected to database');
+            //console.log('Connected to database');
             connection.query(sqlQuery, args, function(error, result) {
                 connection.release();
                 if (error) {
@@ -31,10 +31,10 @@ function query(sqlQuery, args, DTO, callback, action) {
 module.exports = {
 
     getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
-        var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' + 
-        'FROM lascari_net_db.comments LEFT JOIN ' + 
-        '(SELECT threads.id, threads.title FROM lascari_net_db.threads) threads ON threads.id = comments.threadId ' +
-        'WHERE comments.authorId = ?;';
+        var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' +
+            'FROM lascari_net_db.comments LEFT JOIN ' +
+            '(SELECT threads.id, threads.title FROM lascari_net_db.threads) threads ON threads.id = comments.threadId ' +
+            'WHERE comments.authorId = ?;';
         var args = queryObj.id;
         var DTO = [];
 
@@ -48,7 +48,7 @@ module.exports = {
                 });
             }
         });
-    }, 
+    },
 
     getUserThreads: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.title, threads.content, threads.creationDate, comments.commentCount, commentActivity.latestActivity FROM threads ' +
@@ -75,7 +75,27 @@ module.exports = {
         });
     },
 
-    getThread: function(queryObj, callback) {
+    getAllThreads: function(callback) {
+        var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
+            'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId;';
+        var args = []
+        var DTO = [];
+
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                    id: result[i].id,
+                    authorId: result[i].authorId,
+                    author: result[i].username,
+                    title: result[i].title,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate
+                });
+            }
+        });
+    },
+
+    getThreadById: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
             'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
             'WHERE threads.id=?;';
@@ -103,14 +123,13 @@ module.exports = {
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
             for (var i = 0; i < result.length; i++) {
-                var date = new Date(result[i].creationDate);
-                var temp;
-                temp = date.getHours() + ':' + date.getMinutes() + ' | ' + date.getDate() + ' ' + date.toLocaleString('en-US', { month: "long" }) + ' ' + date.getFullYear();
-                DTO.push({ id: result[i].id, 
-                    authorId: result[i].authorId, 
-                    author: result[i].username, 
-                    content: result[i].content, 
-                    creationDate: temp });
+                DTO.push({
+                    id: result[i].id,
+                    authorId: result[i].authorId,
+                    author: result[i].username,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate
+                });
             }
         });
     },
@@ -213,7 +232,7 @@ module.exports = {
 
     saveComment: function(data, callback) {
         pool.getConnection(function(error, connection) {
-            if(error) {
+            if (error) {
                 throw error;
                 connection.release();
             } else {
@@ -227,14 +246,14 @@ module.exports = {
                     } else {
                         console.log('Successfully');
                     }
-                    callback(""+error);
+                    callback("" + error);
                 })
             }
         })
     },
 
     logIn: function(data, callback) {
-        var sqlQuery = "SELECT id FROM users WHERE username = ? AND password = ?;";
+        var sqlQuery = "SELECT id, username FROM users WHERE username = ? AND password = ?;";
         var userObj = JSON.parse(data);
         var args = [userObj.username, userObj.password];
         var DTO = {};
@@ -243,9 +262,22 @@ module.exports = {
             DTO.loggedIn = (result.length > 0);
             if (DTO.loggedIn === true) {
                 DTO.id = result[0].id;
+                DTO.username = result[0].username;
             } else {
                 DTO.message = 'Wrong username or password.';
             }
+        });
+    },
+
+    changePassword: function(data, callback) {
+        var sqlQuery = "UPDATE users SET password = ? WHERE username = ? AND id = ?;";
+        var userObj = JSON.parse(data);
+        var args = [userObj.newPassword, userObj.username, userObj.id];
+        var DTO = {};
+
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            console.log('Successfully changed password to: ' + args);
+            DTO.message = 'Password Changed';
         });
     }
 

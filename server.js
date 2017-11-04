@@ -5,6 +5,7 @@ var http = require('http');
 var config = require('./cfg/config.json');
 var router = require('./modules/router.js');
 var database = require('./modules/database.js');
+var util = require('./modules/util.js');
 var url = require('url');
 
 router.get('/users', function(request, response) {
@@ -16,8 +17,14 @@ router.get('/users', function(request, response) {
 
 router.get('/thread', function(request, response) {
     var urlParts = url.parse(request.url, true);
-    database.getThread(urlParts.query, function(threadDTO) {
+    database.getThreadById(urlParts.query, function(threadDTO) {
         response.end(JSON.stringify(threadDTO));
+    });
+})
+
+router.get('/threads', function(request, response) {
+    database.getAllThreads(function(threadsDTO) {
+        response.end(JSON.stringify(threadsDTO));
     });
 })
 
@@ -84,6 +91,16 @@ router.post('/users', function(request, response) {
     });
 })
 
+router.post('/change', function(request, response) {
+    request.on('data', function(data) {
+        console.log('Received change request for: ' + data);
+        database.changePassword(data, function(changeDTO) {
+            console.log(changeDTO);
+            response.end(JSON.stringify(changeDTO));
+        });
+    });
+})
+
 router.delete('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received delete request for: ' + data);
@@ -95,11 +112,11 @@ router.delete('/users', function(request, response) {
 })
 
 var server = http.createServer(function(request, response) {
-    console.log("Received request for " + request['method'] + request.url);
+    console.log("[" + util.getTime() + "] Received request for " + request['method'] + request.url);
 
     router.handleRequest(request, response);
 });
 
 server.listen(config.server.port, config.server.host, function() {
-    console.log("Listening to http://%s:%s", config.server.host, config.server.port);
+    console.log("[" + util.getTime() + "] Listening to http://%s:%s", config.server.host, config.server.port);
 });
