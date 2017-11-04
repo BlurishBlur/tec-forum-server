@@ -16,7 +16,7 @@ router.get('/users', function(request, response) {
 
 router.get('/thread', function(request, response) {
     var urlParts = url.parse(request.url, true);
-    database.getThread(urlParts.query, function(threadDTO) {
+    database.getThreadById(urlParts.query, function(threadDTO) {
         response.end(JSON.stringify(threadDTO));
     });
 })

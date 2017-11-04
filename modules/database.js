@@ -31,10 +31,10 @@ function query(sqlQuery, args, DTO, callback, action) {
 module.exports = {
 
     getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
-        var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' + 
-        'FROM lascari_net_db.comments LEFT JOIN ' + 
-        '(SELECT threads.id, threads.title FROM lascari_net_db.threads) threads ON threads.id = comments.threadId ' +
-        'WHERE comments.authorId = ?;';
+        var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' +
+            'FROM lascari_net_db.comments LEFT JOIN ' +
+            '(SELECT threads.id, threads.title FROM lascari_net_db.threads) threads ON threads.id = comments.threadId ' +
+            'WHERE comments.authorId = ?;';
         var args = queryObj.id;
         var DTO = [];
 
@@ -48,7 +48,7 @@ module.exports = {
                 });
             }
         });
-    }, 
+    },
 
     getUserThreads: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.title, threads.content, threads.creationDate, comments.commentCount, commentActivity.latestActivity FROM threads ' +
@@ -75,7 +75,7 @@ module.exports = {
         });
     },
 
-    getThread: function(queryObj, callback) {
+    getThreadById: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
             'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
             'WHERE threads.id=?;';
@@ -106,11 +106,13 @@ module.exports = {
                 var date = new Date(result[i].creationDate);
                 var temp;
                 temp = date.getHours() + ':' + date.getMinutes() + ' | ' + date.getDate() + ' ' + date.toLocaleString('en-US', { month: "long" }) + ' ' + date.getFullYear();
-                DTO.push({ id: result[i].id, 
-                    authorId: result[i].authorId, 
-                    author: result[i].username, 
-                    content: result[i].content, 
-                    creationDate: temp });
+                DTO.push({
+                    id: result[i].id,
+                    authorId: result[i].authorId,
+                    author: result[i].username,
+                    content: result[i].content,
+                    creationDate: temp
+                });
             }
         });
     },
@@ -203,7 +205,7 @@ module.exports = {
 
     saveComment: function(data, callback) {
         pool.getConnection(function(error, connection) {
-            if(error) {
+            if (error) {
                 throw error;
                 connection.release();
             } else {
@@ -217,7 +219,7 @@ module.exports = {
                     } else {
                         console.log('Successfully');
                     }
-                    callback(""+error);
+                    callback("" + error);
                 })
             }
         })
