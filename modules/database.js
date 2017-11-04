@@ -75,6 +75,26 @@ module.exports = {
         });
     },
 
+    getAllThreads: function(callback) {
+        var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
+            'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId;';
+        var args = []
+        var DTO = [];
+
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                    id: result[i].id,
+                    authorId: result[i].authorId,
+                    author: result[i].username,
+                    title: result[i].title,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate
+                });
+            }
+        });
+    },
+
     getThreadById: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate FROM lascari_net_db.threads ' +
             'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +

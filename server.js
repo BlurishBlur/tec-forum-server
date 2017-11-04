@@ -21,6 +21,12 @@ router.get('/thread', function(request, response) {
     });
 })
 
+router.get('/threads', function(request, response) {
+    database.getAllThreads(function(threadsDTO) {
+        response.end(JSON.stringify(threadsDTO));
+    });
+})
+
 router.get('/thread/comments', function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getThreadComments(urlParts.query, function(commentsDTO) {
