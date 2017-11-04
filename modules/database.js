@@ -12,7 +12,7 @@ function query(sqlQuery, args, DTO, callback, action) {
             connection.release();
             console.log('Error connecting to database');
         } else {
-            console.log('Connected to database');
+            //console.log('Connected to database');
             connection.query(sqlQuery, args, function(error, result) {
                 connection.release();
                 if (error) {
