@@ -123,15 +123,12 @@ module.exports = {
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
             for (var i = 0; i < result.length; i++) {
-                var date = new Date(result[i].creationDate);
-                var temp;
-                temp = date.getHours() + ':' + date.getMinutes() + ' | ' + date.getDate() + ' ' + date.toLocaleString('en-US', { month: "long" }) + ' ' + date.getFullYear();
                 DTO.push({
                     id: result[i].id,
                     authorId: result[i].authorId,
                     author: result[i].username,
                     content: result[i].content,
-                    creationDate: temp
+                    creationDate: result[i].creationDate
                 });
             }
         });
@@ -266,7 +263,7 @@ module.exports = {
         var userObj = JSON.parse(data);
         var args = [userObj.newPassword, userObj.username, userObj.id];
         var DTO = {};
-        
+
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
             console.log('Successfully changed password to: ' + args);
             DTO.message = 'Password Changed';
