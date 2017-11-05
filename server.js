@@ -29,7 +29,8 @@ router.get('/thread', function(request, response) {
 })
 
 router.get('/threads', function(request, response) {
-    database.getAllThreads(function(threadsDTO) {
+    var urlParts = url.parse(request.url, true);
+    database.getThreadsSearch(urlParts.query, function(threadsDTO) {
         response.end(JSON.stringify(threadsDTO));
     });
 })
