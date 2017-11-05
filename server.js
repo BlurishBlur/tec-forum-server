@@ -15,6 +15,12 @@ router.get('/users', function(request, response) {
     });
 })
 
+router.get('/dashboard', function(request, response) {
+    database.getDashboard(function(threadsDTO) {
+        response.end(JSON.stringify(threadsDTO));
+    });
+})
+
 router.get('/thread', function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getThreadById(urlParts.query, function(threadDTO) {

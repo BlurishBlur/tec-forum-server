@@ -42,6 +42,35 @@ module.exports = {
         })
     },
 
+    getDashboard: function(callback) {
+        var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate, commentsCount.commentsPerThread, commentActivity.latestActivity, activityUser.activityUsername, activityUser.activityUsernameId FROM lascari_net_db.threads ' +
+        'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
+        'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentsPerThread FROM lascari_net_db.comments GROUP BY comments.threadId) commentsCount ON threads.id = commentsCount.threadId ' +
+        'LEFT JOIN (SELECT comments.threadId, MAX(comments.creationDate) as latestActivity, comments.authorId FROM lascari_net_db.comments GROUP BY comments.threadId) commentActivity ON threads.id = commentActivity.threadId ' +
+        'LEFT JOIN (SELECT users.id AS activityUsernameId, users.username AS activityUsername FROM lascari_net_db.users) activityUser ON activityUser.activityUsernameId = commentActivity.authorId ' +
+        'ORDER BY commentActivity.latestActivity DESC;';
+        var args = [];
+        var DTO = [];
+
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                    id: result[i].id,
+                    categoryId: result[i].categoryId,
+                    authorId: result[i].authorId,
+                    username: result[i].username,
+                    title: result[i].title,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate,
+                    commentsCount: result[i].commentsPerThread,
+                    latestActivity: result[i].latestActivity,
+                    activityUsername: result[i].activityUsername,
+                    activityUsernameId: result[i].activityUsernameId
+                });
+            }
+        });
+    },
+
     getUserComments: function(queryObj, callback) { // skal returnere alle kommentarer en bruger har lavet, + titlen på tråden de er i.
         var sqlQuery = 'SELECT comments.threadId, comments.content, comments.creationDate, threads.title ' +
             'FROM lascari_net_db.comments LEFT JOIN ' +
