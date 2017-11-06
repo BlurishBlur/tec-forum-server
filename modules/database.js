@@ -73,8 +73,8 @@ module.exports = {
                 if (DTO[i].username == undefined) {
                     DTO[i].username = '[Deleted user]';
                 }
-                if (DTO[i].latestActivityUsername == undefined) {
-                    DTO[i].latestActivityUsername = '[Deleted user]';
+                if (DTO[i].activityUsername == undefined) {
+                    DTO[i].activityUsername = '[Deleted user]';
                 }
             }
 
@@ -128,14 +128,14 @@ module.exports = {
 
     getThreadsSearch: function(queryObj, callback) {
         var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate, commentsCount.commentsPerThread, latestActivity.latestActivityDate, latestActivity.latestActivityAuthorId, activityUser.latestActivityUsername FROM lascari_net_db.threads ' +
-        'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
-        'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentsPerThread FROM lascari_net_db.comments GROUP BY comments.threadId) commentsCount ON threads.id = commentsCount.threadId ' +
-        'LEFT JOIN (SELECT comments.threadId, comments.authorId AS latestActivityAuthorId, comments.creationDate AS latestActivityDate ' +
-        'FROM lascari_net_db.comments INNER JOIN (SELECT threadId, MAX(creationDate) AS MaxDateTime FROM lascari_net_db.comments GROUP BY threadId) latest ' +
-        'ON comments.threadId = latest.threadId ' +
-        'AND comments.creationDate = latest.MaxDateTime) latestActivity ON latestActivity.threadId = threads.id ' +
-        'LEFT JOIN (SELECT users.id, users.username AS latestActivityUsername FROM lascari_net_db.users) activityUser ON activityUser.id = latestActivity.latestActivityAuthorId ' +
-        'WHERE threads.title LIKE ?;';
+            'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
+            'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentsPerThread FROM lascari_net_db.comments GROUP BY comments.threadId) commentsCount ON threads.id = commentsCount.threadId ' +
+            'LEFT JOIN (SELECT comments.threadId, comments.authorId AS latestActivityAuthorId, comments.creationDate AS latestActivityDate ' +
+            'FROM lascari_net_db.comments INNER JOIN (SELECT threadId, MAX(creationDate) AS MaxDateTime FROM lascari_net_db.comments GROUP BY threadId) latest ' +
+            'ON comments.threadId = latest.threadId ' +
+            'AND comments.creationDate = latest.MaxDateTime) latestActivity ON latestActivity.threadId = threads.id ' +
+            'LEFT JOIN (SELECT users.id, users.username AS latestActivityUsername FROM lascari_net_db.users) activityUser ON activityUser.id = latestActivity.latestActivityAuthorId ' +
+            'WHERE threads.title LIKE ?;';
         var args = '%' + queryObj.id + '%';
         var DTO = [];
 
