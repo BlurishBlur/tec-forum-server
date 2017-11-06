@@ -234,6 +234,37 @@ module.exports = {
         });
     },
 
+    getMytopics: function(queryObj, callback) {
+        var sqlQuery = 'SELECT threads.id, threads.authorId, users.username, threads.title, threads.content, threads.creationDate, commentsCount.commentsPerThread, latestActivity.latestActivityDate, latestActivity.latestActivityAuthorId, activityUser.latestActivityUsername FROM lascari_net_db.threads ' +
+        'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) users ON users.id = threads.authorId ' +
+        'LEFT JOIN (SELECT comments.threadId, COUNT(*) AS commentsPerThread FROM lascari_net_db.comments GROUP BY comments.threadId) commentsCount ON threads.id = commentsCount.threadId ' +
+        'LEFT JOIN (SELECT comments.threadId, comments.authorId AS latestActivityAuthorId, comments.creationDate AS latestActivityDate ' +
+        'FROM lascari_net_db.comments INNER JOIN (SELECT threadId, MAX(creationDate) AS MaxDateTime FROM lascari_net_db.comments GROUP BY threadId) latest ' +
+        'ON comments.threadId = latest.threadId ' +
+        'AND comments.creationDate = latest.MaxDateTime) latestActivity ON latestActivity.threadId = threads.id ' +
+        'LEFT JOIN (SELECT users.id, users.username AS latestActivityUsername FROM lascari_net_db.users) activityUser ON activityUser.id = latestActivity.latestActivityAuthorId ' +
+        'WHERE threads.authorId=?;';
+        var args = queryObj.id;
+        var DTO = [];
+        query(sqlQuery, args, DTO, callback, function(DTO, result) {
+            for (var i = 0; i < result.length; i++) {
+                DTO.push({
+                    id: result[i].id,
+                    categoryId: result[i].categoryId,
+                    authorId: result[i].authorId,
+                    username: result[i].username,
+                    title: result[i].title,
+                    content: result[i].content,
+                    creationDate: result[i].creationDate,
+                    commentsCount: result[i].commentsPerThread,
+                    latestActivity: result[i].latestActivityDate,
+                    activityUsername: result[i].latestActivityUsername,
+                    activityUsernameId: result[i].latestActivityAuthorId
+                });
+            }
+        });
+    },
+
     getCategories: function(callback) {
         var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory, comments.commentsPerCategory, latestActivity.latestActivityDate, latestActivity.latestActivityAuthorId, latestActivity.latestActivityUsername, latestActivity.latestActivityTitle, latestActivity.latestActivityThreadId ' +
             'FROM lascari_net_db.categories ' +
