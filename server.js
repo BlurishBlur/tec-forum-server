@@ -42,7 +42,7 @@ router.get('/thread/comments', function(request, response) {
     });
 })
 
-router.get('/mytopics', function (request, response) {
+router.get('/mytopics', function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getMytopics(urlParts.query, function(mytopicsDTO) {
         response.end(JSON.stringify(mytopicsDTO));
@@ -98,6 +98,16 @@ router.put('/thread/submitComment', function(request, response) {
         database.saveComment(data, function(error) {
             console.log("Comment received!");
             response.end(error);
+        });
+    });
+})
+
+router.put('/thread', function(request, response) {
+    request.on('data', function(data) {
+        console.log("Received thread creation request for: " + data);
+        database.createThread(data, function() {
+            console.log(createThreadDTO);
+            response.end(JSON.stringify(createThreadDTO));
         });
     });
 })
