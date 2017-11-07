@@ -301,18 +301,22 @@ module.exports = {
     },
 
     getCategories: function(callback) {
-        var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory, comments.commentsPerCategory, latestActivity.latestActivityDate, latestActivity.latestActivityAuthorId, latestActivity.latestActivityUsername, latestActivity.latestActivityTitle, latestActivity.latestActivityThreadId ' +
-            'FROM lascari_net_db.categories ' +
-            'LEFT JOIN (SELECT threads.id, threads.categoryId, COUNT(*) AS threadsPerCategory FROM lascari_net_db.threads GROUP BY threads.categoryId) threads ' +
-            'ON categories.id=threads.categoryId ' +
-            'LEFT JOIN (SELECT threads.categoryId, COUNT(*) AS commentsPerCategory FROM lascari_net_db.threads ' +
-            'LEFT JOIN lascari_net_db.comments ON threads.id = comments.threadId WHERE comments.id AND comments.threadId IS NOT NULL ' +
-            'GROUP BY threads.categoryId) comments ' +
-            'ON categories.id = comments.categoryId ' +
-            'LEFT JOIN (SELECT threads.id AS latestActivityThreadId, threads.authorId AS latestActivityAuthorId, activityUser.username AS latestActivityUsername, threads.categoryId, threads.title AS latestActivityTitle, comments.threadId, comments.latestActivityDate FROM lascari_net_db.threads ' +
-            'LEFT JOIN (SELECT users.id, users.username FROM lascari_net_db.users) activityUser ON threads.authorId = activityUser.id ' +
-            'LEFT JOIN (SELECT comments.threadId, MAX(comments.creationDate) AS latestActivityDate ' +
-            'FROM lascari_net_db.comments GROUP BY threadId) comments ON threads.id = comments.threadId GROUP BY categoryId) latestActivity ON latestActivity.categoryId = categories.id; ';
+        var sqlQuery = 'SELECT categories.id, categories.title, categories.description, threads.threadsPerCategory, comments.commentsPerCategory, latestActivity.latestActivityDate, latestActivity.latestActivityAuthorId, users.latestActivityAuthor, latestActivity.latestActivityTitle, latestActivity.latestActivityThreadId ' +
+        'FROM lascari_net_db.categories ' +
+        'LEFT JOIN (SELECT threads.id, threads.categoryId, COUNT(*) AS threadsPerCategory FROM lascari_net_db.threads GROUP BY threads.categoryId) threads ' +
+        'ON categories.id=threads.categoryId ' +
+        'LEFT JOIN (SELECT threads.categoryId, COUNT(*) AS commentsPerCategory FROM lascari_net_db.threads ' +
+        'LEFT JOIN lascari_net_db.comments ON threads.id = comments.threadId WHERE comments.id AND comments.threadId IS NOT NULL ' +
+        'GROUP BY threads.categoryId) comments ' +
+        'ON categories.id = comments.categoryId ' +
+        'LEFT JOIN (SELECT threads.id AS latestActivityThreadId, threads.categoryId, threads.title AS latestActivityTitle, comments.latestActivityAuthorId, comments.threadId, comments.latestActivityDate FROM lascari_net_db.threads ' +
+        'LEFT JOIN ( ' +
+        '    SELECT comments.threadId, comments.authorId AS latestActivityAuthorId, comments.creationDate AS latestActivityDate FROM lascari_net_db.comments ' +
+        '        INNER JOIN( ' +
+        '            SELECT threadId, MAX(creationDate) AS latestActivityDate FROM lascari_net_db.comments GROUP BY threadId ' +
+        '        ) latestComment ON comments.threadId = latestComment.threadId AND comments.creationDate = latestComment.latestActivityDate ' +
+        ') comments ON threads.id = comments.threadId GROUP BY categoryId) latestActivity ON latestActivity.categoryId = categories.id ' +
+        'LEFT JOIN(SELECT users.id, users.username AS latestActivityAuthor FROM lascari_net_db.users) users ON users.id = latestActivity.latestActivityAuthorId';
         var args = [];
         var DTO = [];
 
@@ -330,12 +334,12 @@ module.exports = {
                     commentsCount: commentsCount,
                     latestActivityDate: result[i].latestActivityDate,
                     latestActivityAuthorId: result[i].latestActivityAuthorId,
-                    latestActivityUsername: result[i].latestActivityUsername,
+                    latestActivityUsername: result[i].latestActivityAuthor,
                     latestActivityTitle: result[i].latestActivityTitle,
                     latestActivityThreadId: result[i].latestActivityThreadId
                 });
-                if (DTO[i].activityUsername == undefined) {
-                    DTO[i].activityUsername = '[Deleted user]';
+                if (DTO[i].latestActivityUsername == undefined) {
+                    DTO[i].latestActivityUsername = '[Deleted user]';
                 }
             }
         });
