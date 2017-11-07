@@ -73,8 +73,14 @@ module.exports = {
                 if (DTO[i].username == undefined) {
                     DTO[i].username = '[Deleted user]';
                 }
+                if (DTO[i].activityUsernameId == undefined) {
+                    DTO[i].activityUsername = DTO[i].username;
+                }
                 if (DTO[i].activityUsername == undefined) {
                     DTO[i].activityUsername = '[Deleted user]';
+                }
+                if (DTO[i].latestActivity == undefined) {
+                    DTO[i].latestActivity = DTO[i].creationDate;
                 }
             }
 
@@ -157,8 +163,14 @@ module.exports = {
                 if (DTO[i].username == undefined) {
                     DTO[i].username = '[Deleted user]';
                 }
+                if (DTO[i].activityUsernameId == undefined) {
+                    DTO[i].activityUsername = DTO[i].username;
+                }
                 if (DTO[i].activityUsername == undefined) {
                     DTO[i].activityUsername = '[Deleted user]';
+                }
+                if (DTO[i].latestActivity == undefined) {
+                    DTO[i].latestActivity = DTO[i].creationDate;
                 }
             }
         });
@@ -256,8 +268,14 @@ module.exports = {
                 if (DTO[i].username == undefined) {
                     DTO[i].username = '[Deleted user]';
                 }
+                if (DTO[i].activityUsernameId == undefined) {
+                    DTO[i].activityUsername = DTO[i].username;
+                }
                 if (DTO[i].activityUsername == undefined) {
                     DTO[i].activityUsername = '[Deleted user]';
+                }
+                if (DTO[i].latestActivity == undefined) {
+                    DTO[i].latestActivity = DTO[i].creationDate;
                 }
             }
         });
@@ -293,8 +311,14 @@ module.exports = {
                 if (DTO[i].username == undefined) {
                     DTO[i].username = '[Deleted user]';
                 }
+                if (DTO[i].activityUsernameId == undefined) {
+                    DTO[i].activityUsername = DTO[i].username;
+                }
                 if (DTO[i].activityUsername == undefined) {
                     DTO[i].activityUsername = '[Deleted user]';
+                }
+                if (DTO[i].latestActivity == undefined) {
+                    DTO[i].latestActivity = DTO[i].creationDate;
                 }
             }
         });
@@ -338,8 +362,17 @@ module.exports = {
                     latestActivityTitle: result[i].latestActivityTitle,
                     latestActivityThreadId: result[i].latestActivityThreadId
                 });
+                if (DTO[i].username == undefined) {
+                    DTO[i].username = '[Deleted user]';
+                }
+                if (DTO[i].latestActivityAuthorId == undefined) {
+                    DTO[i].latestActivityUsername = DTO[i].username;
+                }
                 if (DTO[i].latestActivityUsername == undefined) {
                     DTO[i].latestActivityUsername = '[Deleted user]';
+                }
+                if (DTO[i].latestActivityDate == undefined) {
+                    DTO[i].latestActivityDate = DTO[i].creationDate;
                 }
             }
         });
