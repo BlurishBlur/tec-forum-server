@@ -105,7 +105,7 @@ router.put('/thread/submitComment', function(request, response) {
 router.put('/thread', function(request, response) {
     request.on('data', function(data) {
         console.log("Received thread creation request for: " + data);
-        database.createThread(data, function() {
+        database.createThread(data, function(createThreadDTO) {
             console.log(createThreadDTO);
             response.end(JSON.stringify(createThreadDTO));
         });

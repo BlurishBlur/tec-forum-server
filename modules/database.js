@@ -16,7 +16,7 @@ function query(sqlQuery, args, DTO, callback, action) {
             connection.query(sqlQuery, args, function(error, result) {
                 connection.release();
                 if (error) {
-                    //throw error;
+                    throw error;
                     console.log('Error in the query');
                 } else {
                     action(DTO, result);
@@ -404,13 +404,15 @@ module.exports = {
 
     createThread: function(data, callback) {
         var sqlQuery = "INSERT INTO threads(categoryId, authorId, title, content) VALUES(?, ?, ?, ?);";
+        var sqlLast = "SELECT LAST_INSERT_ID();";
         var userObj = JSON.parse(data);
         var args = [userObj.categoryId, userObj.authorId, userObj.title, userObj.content];
         var DTO = {};
 
-        query(sqlQuery, args, DTO, callback, function(DTO, result) {
-            console.log("Thread created: " + data);
-            DTO.message = "Thread Created";
+        query(sqlQuery, args, DTO, function(){}, function({}, result) {
+            query(sqlLast, [], {}, callback, function(DTO, result) {
+                DTO.id = result[0]['LAST_INSERT_ID()'];
+            })
         })
     },
 
