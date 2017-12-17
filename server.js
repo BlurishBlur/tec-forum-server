@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 
 var http = require('http');
-var express = require('express');
-var bodyParser = require('body-parser');
-var cors = require('cors');
-var app = express();
 
 var config = require('./cfg/config.json');
 var router = require('./modules/router.js');
@@ -12,17 +8,7 @@ var database = require('./modules/database.js');
 var util = require('./modules/util.js');
 var url = require('url');
 
-app.use(bodyParser.json());
-app.use(cors());
-
-/*router.get('/users', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getUser(urlParts.query, function(userDTO) {
-        response.end(JSON.stringify(userDTO));
-    });
-})*/
-app.get('/users', function(request, response) {
-    console.log(request.query)
+router.get('/users', function(request, response) {
     var urlParts = url.parse(request.url, true);
     database.getUser(urlParts.query, function(userDTO) {
         response.end(JSON.stringify(userDTO));
@@ -126,7 +112,7 @@ router.put('/thread', function(request, response) {
     });
 })
 
-/*router.post('/users', function(request, response) {
+router.post('/users', function(request, response) {
     request.on('data', function(data) {
         console.log('Received login request for: ' + data);
         database.logIn(data, function(logInDTO) {
@@ -134,14 +120,6 @@ router.put('/thread', function(request, response) {
             response.end(JSON.stringify(logInDTO));
         });
     });
-})*/
-
-app.post('/users', function(request, response) {
-    console.log('Received login request for: %s', JSON.stringify(request.body))
-    database.logIn(request.body, function(logInDTO) {
-        console.log(logInDTO)
-        response.send(logInDTO)
-    })
 })
 
 router.post('/change', function(request, response) {
@@ -164,7 +142,6 @@ router.delete('/users', function(request, response) {
     });
 })
 
-/*
 var server = http.createServer(function(request, response) {
     console.log("[" + util.getTime() + "] Received request for " + request['method'] + request.url);
 
@@ -174,10 +151,3 @@ var server = http.createServer(function(request, response) {
 server.listen(config.server.port, config.server.host, function() {
     console.log("[" + util.getTime() + "] Listening to http://%s:%s", config.server.host, config.server.port);
 });
-*/
-
-var server = app.listen(config.server.port, function() {
-    var port = server.address().port
-
-    console.log('[' + util.getTime() + '] Listening to port %s', port)
-})

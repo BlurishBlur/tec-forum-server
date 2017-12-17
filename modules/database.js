@@ -409,7 +409,7 @@ module.exports = {
         var args = [userObj.categoryId, userObj.authorId, userObj.title, userObj.content];
         var DTO = {};
 
-        query(sqlQuery, args, DTO, function() {}, function({}, result) {
+        query(sqlQuery, args, DTO, function(){}, function({}, result) {
             query(sqlLast, [], {}, callback, function(DTO, result) {
                 DTO.id = result[0]['LAST_INSERT_ID()'];
             })
@@ -440,7 +440,7 @@ module.exports = {
 
     logIn: function(data, callback) {
         var sqlQuery = "SELECT id, username FROM users WHERE username = ? AND password = ?;";
-        var userObj = data
+        var userObj = JSON.parse(data);
         var args = [userObj.username, userObj.password];
         var DTO = {};
 
