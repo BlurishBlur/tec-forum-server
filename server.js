@@ -97,10 +97,7 @@ router.put('/users', function (request, response) {
 router.put('/thread/submitComment', function (request, response) {
     request.on('data', function (data) {
         database.saveComment(data, function (error) {
-            console.log("Comment received!");
-
-
-            
+            console.log("Comment received!");         
             response.end(error);
         });
     });
@@ -156,11 +153,26 @@ var io = require('socket.io')(server);
 
 // Comment Realtime
 io.on('connection', function (socket) {
+
+    socket.on('join', function(room) {
+        socket.join(room);
+    })
+
     socket.on('newComment', function(data) {
         var broadcastId = "thread" + data.threadId;
-        socket.broadcast.emit(broadcastId, {test: "Test"} );
-    }) ;
+        var DTO;
+
+        database.getThreadComments({ id: data.threadId }, function (commentsDTO) {
+            DTO = JSON.stringify(commentsDTO);
+           
+            socket.to(broadcastId).emit('update', DTO);
+        });
+
+        
+    });
 });
+
+
 
 server.listen(config.server.port, config.server.host, function () {
     console.log("[" + util.getTime() + "] Listening to http://%s:%s", config.server.host, config.server.port);
