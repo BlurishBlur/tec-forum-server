@@ -3,14 +3,21 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var cookieParser = require('cookie-parser');
 var app = express();
+
+var jwt = require('jsonwebtoken');
+var uuid = require('uuid');
 
 var config = require('./cfg/config.json');
 var database = require('./modules/database.js');
 var util = require('./modules/util.js');
 
+var secretKey = uuid.v4();
+
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({ origin: true, credentials: true, methods: 'GET,HEAD,PUT,POST,DELETE' }));
+app.use(cookieParser());
 
 app.use(logger);
 
@@ -34,7 +41,11 @@ app.get('/users', function(request, response) {
 
 app.get('/dashboard', function(request, response) {
     database.getDashboard(function(threadsDTO) {
+        response.clearCookie('rememberme')
+        response.cookie('rememberme', 'yes', { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
+        //response.setHeader('Set-Cookie', ['type=ninja', 'language=javascript']);
         response.send(threadsDTO)
+        console.log(request.cookies)
     });
 })
 
@@ -112,7 +123,17 @@ app.put('/thread', function(request, response) {
 })
 
 app.post('/users', function(request, response) {
+    //request.headers.authorization = "test"
+    console.log(request.headers.authorization)
     database.logIn(request.body, function(logInDTO) {
+        if (logInDTO.loggedIn === true) {
+            var claims = {
+                sub: logInDTO.id,
+                name: logInDTO.username
+            }
+            var token = jwt.sign(claims, secretKey)
+            console.log(token)
+        }
         console.log(logInDTO)
         response.send(logInDTO)
     })
