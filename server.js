@@ -1,183 +1,139 @@
 #!/usr/bin/env node
 
-var http = require('http');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var app = express();
 
 var config = require('./cfg/config.json');
-var router = require('./modules/router.js');
 var database = require('./modules/database.js');
 var util = require('./modules/util.js');
-var url = require('url');
 
 app.use(bodyParser.json());
 app.use(cors());
 
-/*router.get('/users', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getUser(urlParts.query, function(userDTO) {
-        response.end(JSON.stringify(userDTO));
-    });
-})*/
+app.use(logger);
+
+function logger(request, response, next) {
+    console.log('[%s] Received request for %s%s', util.getTime(), request.method, request.url)
+    if (Object.keys(request.query).length !== 0) {
+        console.log('Query:', request.query)
+    }
+    if (Object.keys(request.body).length !== 0) {
+        console.log('Body:', request.body)
+    }
+
+    next()
+}
+
 app.get('/users', function(request, response) {
-    console.log(request.query)
-    var urlParts = url.parse(request.url, true);
-    database.getUser(urlParts.query, function(userDTO) {
-        response.end(JSON.stringify(userDTO));
+    database.getUser(request.query, function(userDTO) {
+        response.send(userDTO)
     });
 })
 
-router.get('/dashboard', function(request, response) {
+app.get('/dashboard', function(request, response) {
     database.getDashboard(function(threadsDTO) {
-        response.end(JSON.stringify(threadsDTO));
+        response.send(threadsDTO)
     });
 })
 
-router.get('/thread', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadById(urlParts.query, function(threadDTO) {
-        response.end(JSON.stringify(threadDTO));
+app.get('/thread', function(request, response) {
+    database.getThreadById(request.query, function(threadDTO) {
+        response.send(threadDTO)
     });
 })
 
-router.get('/threads', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadsSearch(urlParts.query, function(threadsDTO) {
-        response.end(JSON.stringify(threadsDTO));
+app.get('/threads', function(request, response) {
+    database.getThreadsSearch(request.query, function(threadsDTO) {
+        response.send(threadsDTO)
     });
 })
 
-router.get('/thread/comments', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadComments(urlParts.query, function(commentsDTO) {
-        response.end(JSON.stringify(commentsDTO));
+app.get('/thread/comments', function(request, response) {
+    database.getThreadComments(request.query, function(commentsDTO) {
+        response.send(commentsDTO)
     });
 })
 
-router.get('/mytopics', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getMytopics(urlParts.query, function(mytopicsDTO) {
-        response.end(JSON.stringify(mytopicsDTO));
+app.get('/mytopics', function(request, response) {
+    database.getMytopics(request.query, function(mytopicsDTO) {
+        response.send(mytopicsDTO)
     });
 })
 
-router.get('/categoryName', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getCategoryName(urlParts.query, function(categoryNameDTO) {
-        response.end(JSON.stringify(categoryNameDTO));
+app.get('/categoryName', function(request, response) {
+    database.getCategoryName(request.query, function(categoryNameDTO) {
+        response.send(categoryNameDTO)
     });
 })
 
-router.get('/categories', function(request, response) {
+app.get('/categories', function(request, response) {
     database.getCategories(function(categoriesDTO) {
-        response.end(JSON.stringify(categoriesDTO));
+        response.send(categoriesDTO)
     });
 })
 
-router.get('/categories/threads', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getThreadsInCategory(urlParts.query, function(threadsDTO) {
-        response.end(JSON.stringify(threadsDTO));
+app.get('/categories/threads', function(request, response) {
+    database.getThreadsInCategory(request.query, function(threadsDTO) {
+        response.send(threadsDTO)
     });
 })
 
-router.get('/users/threads', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getUserThreads(urlParts.query, function(threadsDTO) {
-        response.end(JSON.stringify(threadsDTO));
+app.get('/users/threads', function(request, response) {
+    database.getUserThreads(request.query, function(threadsDTO) {
+        response.send(threadsDTO)
     });
 })
 
-router.get('/users/comments', function(request, response) {
-    var urlParts = url.parse(request.url, true);
-    database.getUserComments(urlParts.query, function(commentsDTO) {
-        response.end(JSON.stringify(commentsDTO));
+app.get('/users/comments', function(request, response) {
+    database.getUserComments(request.query, function(commentsDTO) {
+        response.send(commentsDTO)
     });
 })
 
-router.put('/users', function(request, response) {
-    request.on('data', function(data) {
-        console.log('Received user creation request for: ' + data);
-        database.saveUser(data, function(saveUserDTO) {
-            console.log(saveUserDTO);
-            response.end(JSON.stringify(saveUserDTO));
-        });
-    });
+app.put('/users', function(request, response) {
+    database.saveUser(request.body, function(saveUserDTO) {
+        console.log(saveUserDTO);
+        response.send(saveUserDTO)
+    })
 })
 
-router.put('/thread/submitComment', function(request, response) {
-    request.on('data', function(data) {
-        database.saveComment(data, function(error) {
-            console.log("Comment received!");
-            response.end(error);
-        });
-    });
+app.put('/thread/submitComment', function(request, response) {
+    database.saveComment(request.body, function(error) {
+        response.send(error)
+    })
 })
 
-router.put('/thread', function(request, response) {
-    request.on('data', function(data) {
-        console.log("Received thread creation request for: " + data);
-        database.createThread(data, function(createThreadDTO) {
-            console.log(createThreadDTO);
-            response.end(JSON.stringify(createThreadDTO));
-        });
-    });
+app.put('/thread', function(request, response) {
+    database.createThread(request.body, function(createThreadDTO) {
+        response.send(createThreadDTO)
+    })
 })
-
-/*router.post('/users', function(request, response) {
-    request.on('data', function(data) {
-        console.log('Received login request for: ' + data);
-        database.logIn(data, function(logInDTO) {
-            console.log(logInDTO);
-            response.end(JSON.stringify(logInDTO));
-        });
-    });
-})*/
 
 app.post('/users', function(request, response) {
-    console.log('Received login request for: %s', JSON.stringify(request.body))
     database.logIn(request.body, function(logInDTO) {
         console.log(logInDTO)
         response.send(logInDTO)
     })
 })
 
-router.post('/change', function(request, response) {
-    request.on('data', function(data) {
-        console.log('Received change request for: ' + data);
-        database.changePassword(data, function(changeDTO) {
-            console.log(changeDTO);
-            response.end(JSON.stringify(changeDTO));
-        });
-    });
+app.post('/change', function(request, response) {
+    database.changePassword(request.body, function(changeDTO) {
+        console.log(changeDTO)
+        response.send(changeDTO)
+    })
 })
 
-router.delete('/users', function(request, response) {
-    request.on('data', function(data) {
-        console.log('Received delete request for: ' + data);
-        database.deleteUser(data, function(deleteDTO) {
-            console.log(deleteDTO);
-            response.end(JSON.stringify(deleteDTO));
-        });
-    });
+app.delete('/users', function(request, response) {
+    database.deleteUser(request.body, function(deleteDTO) {
+        console.log(deleteDTO)
+        response.send(deleteDTO)
+    })
 })
-
-/*
-var server = http.createServer(function(request, response) {
-    console.log("[" + util.getTime() + "] Received request for " + request['method'] + request.url);
-
-    router.handleRequest(request, response);
-});
-
-server.listen(config.server.port, config.server.host, function() {
-    console.log("[" + util.getTime() + "] Listening to http://%s:%s", config.server.host, config.server.port);
-});
-*/
 
 var server = app.listen(config.server.port, function() {
     var port = server.address().port
 
-    console.log('[' + util.getTime() + '] Listening to port %s', port)
+    console.log('[%s] Listening to port %s', util.getTime(), port)
 })

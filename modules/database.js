@@ -380,24 +380,22 @@ module.exports = {
 
     deleteUser: function(data, callback) {
         var sqlQuery = "DELETE FROM users WHERE username = ? AND id = ?;";
-        var userObj = JSON.parse(data);
-        var args = [userObj.username, userObj.id];
+        var args = [data.username, data.id];
         var DTO = {};
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
-            console.log('Successfully deleted user ' + data);
+            console.log('Successfully deleted user ' + JSON.stringify(data));
             DTO.message = 'User deleted.';
         });
     },
 
     saveUser: function(data, callback) {
         var sqlQuery = "INSERT INTO users(username, password) VALUES(?, ?);";
-        var userObj = JSON.parse(data);
-        var args = [userObj.username, userObj.password];
+        var args = [data.username, data.password];
         var DTO = {};
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
-            console.log('Successfully created user ' + data);
+            console.log('Successfully created user ' + JSON.stringify(data));
             DTO.message = 'User created.';
         });
     },
@@ -405,8 +403,7 @@ module.exports = {
     createThread: function(data, callback) {
         var sqlQuery = "INSERT INTO threads(categoryId, authorId, title, content) VALUES(?, ?, ?, ?);";
         var sqlLast = "SELECT LAST_INSERT_ID();";
-        var userObj = JSON.parse(data);
-        var args = [userObj.categoryId, userObj.authorId, userObj.title, userObj.content];
+        var args = [data.categoryId, data.authorId, data.title, data.content];
         var DTO = {};
 
         query(sqlQuery, args, DTO, function() {}, function({}, result) {
@@ -423,14 +420,14 @@ module.exports = {
                 connection.release();
             } else {
                 var query = "INSERT INTO comments(threadId, authorId, content) VALUES(?, ?, ?)";
-                var commentObj = JSON.parse(data);
+                var commentObj = data;
                 connection.query(query, [commentObj.threadId, commentObj.authorId, commentObj.comment], function(error, result) {
                     connection.release();
                     if (error) {
                         throw error;
                         console.log('Error in the query');
                     } else {
-                        console.log('Successfully');
+                        console.log('Successfully made comment');
                     }
                     callback("" + error);
                 })
@@ -440,8 +437,7 @@ module.exports = {
 
     logIn: function(data, callback) {
         var sqlQuery = "SELECT id, username FROM users WHERE username = ? AND password = ?;";
-        var userObj = data
-        var args = [userObj.username, userObj.password];
+        var args = [data.username, data.password];
         var DTO = {};
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
@@ -457,13 +453,12 @@ module.exports = {
 
     changePassword: function(data, callback) {
         var sqlQuery = "UPDATE users SET password = ? WHERE username = ? AND id = ?;";
-        var userObj = JSON.parse(data);
-        var args = [userObj.newPassword, userObj.username, userObj.id];
+        var args = [data.newPassword, data.username, data.id];
         var DTO = {};
 
         query(sqlQuery, args, DTO, callback, function(DTO, result) {
-            console.log('Successfully changed password to: ' + args);
-            DTO.message = 'Password Changed';
+            console.log('Successfully changed password for: ' + args);
+            DTO.message = 'Password changed';
         });
     }
 
