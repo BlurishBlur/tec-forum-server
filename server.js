@@ -41,8 +41,8 @@ app.get('/users', function(request, response) {
 
 app.get('/dashboard', function(request, response) {
     database.getDashboard(function(threadsDTO) {
-        response.clearCookie('rememberme')
-        response.cookie('rememberme', 'yes', { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
+        //response.clearCookie('rememberme')
+        response.cookie('rememberme ' + Math.random(), 'yes', { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
         //response.setHeader('Set-Cookie', ['type=ninja', 'language=javascript']);
         response.send(threadsDTO)
         console.log(request.cookies)
@@ -124,7 +124,6 @@ app.put('/thread', function(request, response) {
 
 app.post('/users', function(request, response) {
     //request.headers.authorization = "test"
-    console.log(request.headers.authorization)
     database.logIn(request.body, function(logInDTO) {
         if (logInDTO.loggedIn === true) {
             var claims = {

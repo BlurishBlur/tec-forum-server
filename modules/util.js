@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-var url = require('url');
-
 function pad(time) {
     if (time < 10) {
         time = '0' + time;
