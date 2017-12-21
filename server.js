@@ -33,17 +33,27 @@ function logger(request, response, next) {
     next()
 }
 
+function authorize(request, response, next) {
+    var token = request.headers.authorization
+    console.log('Authorizing request with token:', token)
+    jwt.verify(token, secretKey, function(error, tok) {
+        if (error) {
+            console.log('Invalid token.')
+            response.sendStatus(403)
+        } else {
+            next()
+        }
+    })
+}
+
 app.get('/users', function(request, response) {
     database.getUser(request.query, function(userDTO) {
         response.send(userDTO)
     });
 })
 
-app.get('/dashboard', function(request, response) {
+app.get('/dashboard', authorize, function(request, response) {
     database.getDashboard(function(threadsDTO) {
-        //response.clearCookie('rememberme')
-        response.cookie('rememberme ' + Math.random(), 'yes', { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
-        //response.setHeader('Set-Cookie', ['type=ninja', 'language=javascript']);
         response.send(threadsDTO)
         console.log(request.cookies)
     });
@@ -123,7 +133,6 @@ app.put('/thread', function(request, response) {
 })
 
 app.post('/users', function(request, response) {
-    //request.headers.authorization = "test"
     database.logIn(request.body, function(logInDTO) {
         if (logInDTO.loggedIn === true) {
             var claims = {
@@ -131,7 +140,8 @@ app.post('/users', function(request, response) {
                 name: logInDTO.username
             }
             var token = jwt.sign(claims, secretKey)
-            console.log(token)
+            console.log('Creating new token:', token)
+            response.cookie('auth-token', token, { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
         }
         console.log(logInDTO)
         response.send(logInDTO)
