@@ -46,7 +46,7 @@ function authorize(request, response, next) {
     })
 }
 
-app.get('/users', function(request, response) {
+app.get('/users', authorize, function(request, response) {
     database.getUser(request.query, function(userDTO) {
         response.send(userDTO)
     });
@@ -55,80 +55,79 @@ app.get('/users', function(request, response) {
 app.get('/dashboard', authorize, function(request, response) {
     database.getDashboard(function(threadsDTO) {
         response.send(threadsDTO)
-        console.log(request.cookies)
     });
 })
 
-app.get('/thread', function(request, response) {
+app.get('/thread', authorize, function(request, response) {
     database.getThreadById(request.query, function(threadDTO) {
         response.send(threadDTO)
     });
 })
 
-app.get('/threads', function(request, response) {
+app.get('/threads', authorize, function(request, response) {
     database.getThreadsSearch(request.query, function(threadsDTO) {
         response.send(threadsDTO)
     });
 })
 
-app.get('/thread/comments', function(request, response) {
+app.get('/thread/comments', authorize, function(request, response) {
     database.getThreadComments(request.query, function(commentsDTO) {
         response.send(commentsDTO)
     });
 })
 
-app.get('/mytopics', function(request, response) {
+app.get('/mytopics', authorize, function(request, response) {
     database.getMytopics(request.query, function(mytopicsDTO) {
         response.send(mytopicsDTO)
     });
 })
 
-app.get('/categoryName', function(request, response) {
+app.get('/categoryName', authorize, function(request, response) {
     database.getCategoryName(request.query, function(categoryNameDTO) {
         response.send(categoryNameDTO)
     });
 })
 
-app.get('/categories', function(request, response) {
+app.get('/categories', authorize, function(request, response) {
     database.getCategories(function(categoriesDTO) {
         response.send(categoriesDTO)
     });
 })
 
-app.get('/categories/threads', function(request, response) {
+app.get('/categories/threads', authorize, function(request, response) {
     database.getThreadsInCategory(request.query, function(threadsDTO) {
         response.send(threadsDTO)
     });
 })
 
-app.get('/users/threads', function(request, response) {
+app.get('/users/threads', authorize, function(request, response) {
     database.getUserThreads(request.query, function(threadsDTO) {
         response.send(threadsDTO)
     });
 })
 
-app.get('/users/comments', function(request, response) {
+app.get('/users/comments', authorize, function(request, response) {
     database.getUserComments(request.query, function(commentsDTO) {
         response.send(commentsDTO)
     });
+})
+
+app.put('/thread/submitComment', authorize, function(request, response) {
+    database.saveComment(request.body, function(error) {
+        response.send(error)
+    })
+})
+
+app.put('/thread', authorize, function(request, response) {
+    database.createThread(request.body, function(createThreadDTO) {
+        response.send(createThreadDTO)
+    })
 })
 
 app.put('/users', function(request, response) {
     database.saveUser(request.body, function(saveUserDTO) {
         console.log(saveUserDTO);
         response.send(saveUserDTO)
-    })
-})
-
-app.put('/thread/submitComment', function(request, response) {
-    database.saveComment(request.body, function(error) {
-        response.send(error)
-    })
-})
-
-app.put('/thread', function(request, response) {
-    database.createThread(request.body, function(createThreadDTO) {
-        response.send(createThreadDTO)
     })
 })
 
@@ -148,14 +147,14 @@ app.post('/users', function(request, response) {
     })
 })
 
-app.post('/change', function(request, response) {
+app.post('/change', authorize, function(request, response) {
     database.changePassword(request.body, function(changeDTO) {
         console.log(changeDTO)
         response.send(changeDTO)
     })
 })
 
-app.delete('/users', function(request, response) {
+app.delete('/users', authorize, function(request, response) {
     database.deleteUser(request.body, function(deleteDTO) {
         console.log(deleteDTO)
         response.send(deleteDTO)
