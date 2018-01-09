@@ -140,7 +140,7 @@ app.post('/users', function(request, response) {
             }
             var token = jwt.sign(claims, secretKey)
             console.log('Creating new token:', token)
-            response.cookie('auth-token', token, { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
+            response.cookie('auth-token', token, { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: false });
         }
         console.log(logInDTO)
         response.send(logInDTO)
